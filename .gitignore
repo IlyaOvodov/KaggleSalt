@@ -1,0 +1,7 @@
+*.pyc
+*.suo
+*.solverstate
+*.caffemodel
+__pycache__/
+catboost_info/
+.ipynb_checkpoints/
