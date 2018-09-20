@@ -1,0 +1,27 @@
+Image -> 303õ303, crop 224x224, flip
+
+epochs_warmup = 2
+epochs = 150
+batch_size = 25
+
+early_stopping = EarlyStopping(monitor='val_my_iou_metric', mode = 'max',patience=30, verbose=1)
+model_checkpoint = ModelCheckpoint(model_out_file, monitor='val_my_iou_metric',
+                                   mode = 'max', save_best_only=True, verbose=1)
+reduce_lr = ReduceLROnPlateau(monitor='val_my_iou_metric', mode = 'max',factor=0.2, patience=10, min_lr=0.00001, verbose=1)
+
+FNN_resnet
+0 - , 0.8592 (0.4816714219998361, 0.11148821093364449)
+1 - 0.89748 (0.4823356019939591, 0.11072641306201825) 
+2 - 0.87859 (0.48151992257053783, 0.11100193150532368)
+3 - 0.8715 (0.4812546094802983, 0.11139168313624472)
+4 - ,0.8589 * (0.481104027852686, 0.11080583023478532)
+----------------------
+0.481577, 0.11108
+
+* V4 - 
+Epoch 00046: val_my_iou_metric improved from 0.83413 to 0.85210, saving model to models_1/FNN_resnet34_4.model
+Epoch 46
+
+
+FNN_inceptionv3
+batch_size = 20

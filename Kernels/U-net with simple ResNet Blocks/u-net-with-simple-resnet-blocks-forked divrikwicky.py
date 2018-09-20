@@ -21,7 +21,7 @@
 # The results seems not reproducible,  sometimes good (best around IOU0.79 ), sometimes  not as good!
 # Any suggestions to improve the results?
 
-# In[ ]:
+# In[18]:
 
 
 import os
@@ -60,7 +60,37 @@ import tensorflow as tf
 from keras.preprocessing.image import ImageDataGenerator, array_to_img, img_to_array, load_img#,save_img
 
 
-# In[ ]:
+# In[19]:
+
+
+import sys
+sys.path.append('../../LovaszSoftmax/tensorflow')
+import lovasz_losses_tf as L_loss
+
+
+# ### Reproducability setup:
+
+# In[20]:
+
+
+import random as rn
+
+kSeed = 241075
+
+import os
+os.environ['PYTHONHASHSEED'] = '0'
+
+np.random.seed(kSeed)
+rn.seed(kSeed)
+
+#session_conf = tf.ConfigProto(intra_op_parallelism_threads=1, inter_op_parallelism_threads=1)
+tf.set_random_seed(kSeed)
+#sess = tf.Session(graph=tf.get_default_graph(), config=session_conf)
+sess = tf.Session(graph=tf.get_default_graph())
+K.set_session(sess)
+
+
+# In[21]:
 
 
 # Set some parameters
@@ -69,7 +99,7 @@ img_size_target = 101
 im_width = 101
 im_height = 101
 im_chan = 1
-basicpath = '../input/'
+basicpath = 'T:/Kaggle_Data/Salt/'
 path_train = basicpath + 'train/'
 path_test = basicpath + 'test/'
 
@@ -78,33 +108,32 @@ path_train_masks = path_train + 'masks/'
 path_test_images = path_test + 'images/'
 
 
-
-# In[ ]:
+# In[22]:
 
 
 # Loading of training/testing ids and depths
 
-train_df = pd.read_csv("../input/train.csv", index_col="id", usecols=[0])
-depths_df = pd.read_csv("../input/depths.csv", index_col="id")
+train_df = pd.read_csv(basicpath+"/train.csv", index_col="id", usecols=[0])
+depths_df = pd.read_csv(basicpath+"/depths.csv", index_col="id")
 train_df = train_df.join(depths_df)
 test_df = depths_df[~depths_df.index.isin(train_df.index)]
 
 len(train_df)
 
 
-# In[ ]:
+# In[23]:
 
 
-train_df["images"] = [np.array(load_img("../input/train/images/{}.png".format(idx), grayscale=True)) / 255 for idx in tqdm_notebook(train_df.index)]
+train_df["images"] = [np.array(load_img(path_train_images+"{}.png".format(idx), grayscale=True)) / 255 for idx in tqdm_notebook(train_df.index)]
 
 
-# In[ ]:
+# In[24]:
 
 
-train_df["masks"] = [np.array(load_img("../input/train/masks/{}.png".format(idx), grayscale=True)) / 255 for idx in tqdm_notebook(train_df.index)]
+train_df["masks"] = [np.array(load_img(path_train_masks+"{}.png".format(idx), grayscale=True)) / 255 for idx in tqdm_notebook(train_df.index)]
 
 
-# In[ ]:
+# In[25]:
 
 
 train_df["coverage"] = train_df.masks.map(np.sum) / pow(img_size_ori, 2)
@@ -117,7 +146,7 @@ def cov_to_class(val):
 train_df["coverage_class"] = train_df.coverage.map(cov_to_class)
 
 
-# In[ ]:
+# In[26]:
 
 
 fig, axs = plt.subplots(1, 2, figsize=(15,5))
@@ -128,7 +157,7 @@ axs[0].set_xlabel("Coverage")
 axs[1].set_xlabel("Coverage class")
 
 
-# In[ ]:
+# In[27]:
 
 
 #Plotting the depth distributions¶
@@ -139,7 +168,7 @@ plt.legend()
 plt.title("Depth distribution")
 
 
-# In[ ]:
+# In[28]:
 
 
 # Create train/validation split stratified by salt coverage
@@ -153,7 +182,7 @@ ids_train, ids_valid, x_train, x_valid, y_train, y_valid, cov_train, cov_test, d
     test_size=0.2, stratify=train_df.coverage_class, random_state= 1234)
 
 
-# In[ ]:
+# In[29]:
 
 
 ACTIVATION = "relu"
@@ -174,7 +203,7 @@ def residual_block(blockInput, num_filters=16):
     return x
 
 
-# In[ ]:
+# In[30]:
 
 
 # Build model
@@ -265,7 +294,7 @@ def build_model(input_layer, start_neurons, DropoutRatio = 0.5):
     return output_layer
 
 
-# In[ ]:
+# In[31]:
 
 
 thresholds = np.array([0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95])
@@ -290,17 +319,42 @@ def iou_metric(imgs_true, imgs_pred):
     return scores.mean()
 
 
-# In[ ]:
+# In[32]:
+
+
+def iou_metric_batch(y_true_in, y_pred_in):
+    y_pred_in = y_pred_in > 0.5 # added by sgx 20180728
+    batch_size = y_true_in.shape[0]
+    metric = []
+    for batch in range(batch_size):
+        value = iou_metric(y_true_in[batch], y_pred_in[batch])
+        metric.append(value)
+    #print("metric = ",metric)
+    return np.mean(metric)
+
+def my_iou_metric(label, pred):
+    metric_value = tf.py_func(iou_metric_batch, [label, pred], tf.float64)
+    return metric_value
+
+
+# In[33]:
 
 
 #Data augmentation
 x_train = np.append(x_train, [np.fliplr(x) for x in x_train], axis=0)
 y_train = np.append(y_train, [np.fliplr(x) for x in y_train], axis=0)
 print(x_train.shape)
-print(y_valid.shape)
+print(x_valid.shape)
 
 
-# In[ ]:
+# In[34]:
+
+
+def lavazs_loss(labels, scores): # Keras and TF has reversed order of args
+    return L_loss.lovasz_hinge(2*scores-1, labels, ignore=255, per_image=True)
+
+
+# In[35]:
 
 
 # model
@@ -308,36 +362,50 @@ input_layer = Input((img_size_target, img_size_target, 1))
 output_layer = build_model(input_layer, 16,0.5)
 
 model = Model(input_layer, output_layer)
-model.compile(loss="binary_crossentropy", optimizer="adam", metrics=["acc"])
+model.compile(loss="binary_crossentropy", optimizer="adam", metrics=["acc", my_iou_metric])
+
+
+# In[36]:
+
+
+print(model.summary())
 
 
 # In[ ]:
 
 
-early_stopping = EarlyStopping(monitor='val_acc', mode = 'max',patience=20, verbose=1)
-model_checkpoint = ModelCheckpoint("./unet_best1.model",monitor='val_acc', 
+model.load_weights('./unet_best  18.09.04.23.20.model')
+
+
+# In[21]:
+
+
+early_stopping = EarlyStopping(monitor='val_my_iou_metric', mode = 'max',patience=30, verbose=1)
+model_checkpoint = ModelCheckpoint("./unet_best1.model",monitor='val_my_iou_metric', 
                                    mode = 'max', save_best_only=True, verbose=1)
-reduce_lr = ReduceLROnPlateau(monitor='val_acc', mode = 'max',factor=0.2, patience=5, min_lr=0.00001, verbose=1)
+reduce_lr = ReduceLROnPlateau(monitor='val_my_iou_metric', mode = 'max',factor=0.2, patience=10, min_lr=0.00001, verbose=1)
 #reduce_lr = ReduceLROnPlateau(factor=0.2, patience=5, min_lr=0.00001, verbose=1)
 
 epochs = 200
-batch_size = 32
+batch_size = 25
 
 history = model.fit(x_train, y_train,
                     validation_data=[x_valid, y_valid], 
                     epochs=epochs,
                     batch_size=batch_size,
                     callbacks=[early_stopping, model_checkpoint, reduce_lr], 
-                    verbose=1)
+                    verbose=2)
 
 
-# In[ ]:
+# In[22]:
 
 
 import matplotlib.pyplot as plt
 # summarize history for loss
 plt.plot(history.history['acc'][1:])
 plt.plot(history.history['val_acc'][1:])
+plt.plot(history.history['my_iou_metric'][1:])
+plt.plot(history.history['val_my_iou_metric'][1:])
 plt.title('model loss')
 plt.ylabel('loss')
 plt.xlabel('epoch')
@@ -345,7 +413,7 @@ plt.legend(['train','Validation'], loc='upper left')
 plt.show()
 
 
-# In[ ]:
+# In[23]:
 
 
 fig, (ax_loss, ax_acc) = plt.subplots(1, 2, figsize=(15,5))
@@ -353,13 +421,13 @@ ax_loss.plot(history.epoch, history.history["loss"], label="Train loss")
 ax_loss.plot(history.epoch, history.history["val_loss"], label="Validation loss")
 
 
-# In[ ]:
+# In[19]:
 
 
-model = load_model("./unet_best1.model")
+model = load_model("./unet_best  18.09.05.19.44x.model",custom_objects={'my_iou_metric': my_iou_metric, 'lavazs_loss': lavazs_loss})
 
 
-# In[ ]:
+# In[20]:
 
 
 def predict_result(model,x_test,img_size_target): # predict both orginal and reflect x
@@ -368,13 +436,13 @@ def predict_result(model,x_test,img_size_target): # predict both orginal and ref
     return preds_test/2.0
 
 
-# In[ ]:
+# In[21]:
 
 
 preds_valid = predict_result(model,x_valid,img_size_target)
 
 
-# In[ ]:
+# In[22]:
 
 
 def filter_image(img):
@@ -388,7 +456,7 @@ thresholds = np.linspace(0.3, 0.7, 31)
 ious = np.array([iou_metric(y_valid.reshape((-1, img_size_target, img_size_target)), [filter_image(img) for img in preds_valid > threshold]) for threshold in tqdm_notebook(thresholds)])
 
 
-# In[ ]:
+# In[23]:
 
 
 threshold_best_index = np.argmax(ious) 
@@ -403,7 +471,7 @@ plt.title("Threshold vs IoU ({}, {})".format(threshold_best, iou_best))
 plt.legend()
 
 
-# In[ ]:
+# In[24]:
 
 
 def rle_encode(im):
@@ -423,10 +491,10 @@ del x_train, x_valid, y_train, y_valid, preds_valid
 gc.collect()
 
 
-# In[ ]:
+# In[25]:
 
 
-x_test = np.array([(np.array(load_img("../input/test/images/{}.png".format(idx), grayscale = True))) / 255 for idx in tqdm_notebook(test_df.index)]).reshape(-1, img_size_target, img_size_target, 1)
+x_test = np.array([(np.array(load_img(path_test_images+"{}.png".format(idx), grayscale = True))) / 255 for idx in tqdm_notebook(test_df.index)]).reshape(-1, img_size_target, img_size_target, 1)
 
 preds_test = predict_result(model,x_test,img_size_target)
 
@@ -448,11 +516,29 @@ print(f"Usedtime = {t2-t1} s")
 sub = pd.DataFrame.from_dict(pred_dict,orient='index')
 sub.index.names = ['id']
 sub.columns = ['rle_mask']
-sub.to_csv('submission.csv')
+sub.to_csv('submission.csv.gz', compression = 'gzip')
 
 
 # In[ ]:
 
 
 sub.head(10)
+
+
+# In[ ]:
+
+
+preds_test2 = filter_image(preds_test > threshold_best)
+test_df['pred']= None
+for i, idx in enumerate(tqdm_notebook(test_df.index.values)
+    test_df.loc[idx, 'pred'] = preds_test2[i]
+
+
+#preds_test["img_is_empty"] = (preds_test.map(np.max) == 0)
+
+
+# In[40]:
+
+
+preds_test.shape, preds_test2.shape
 
