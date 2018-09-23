@@ -15,7 +15,7 @@ from tqdm import tqdm_notebook
 
 import torch
 
-def load_image(path, mask = False):
+def load_image(path, mask = False, to_gray=False):
     """
     Load image from a given path and pad it on the sides, so that eash side is divisible by 32 (newtwork requirement)
     
@@ -25,7 +25,6 @@ def load_image(path, mask = False):
         returns image as numpy.array
     """
     img = cv2.imread(str(path))
-    #img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
     if mask:
         # Convert mask to 0 and 1 format
@@ -33,15 +32,19 @@ def load_image(path, mask = False):
         img = torch.from_numpy(img // 255)
         return img.float()
     else:
+        if to_gray:
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         img = torch.from_numpy(img / 255.0)
+        if to_gray:
+            img = img.reshape((img.shape[0],img.shape[1],1))
         return img
         #return img.float().reshape((img.shape[0],img.shape[1],1)).permute([2, 0, 1])
 
-def LoadImages(df, train_data = True):
+def LoadImages(df, train_data = True, to_gray=False):
     path = path_train if train_data else path_test
     path_images = path + 'images/'
     path_masks  = path + 'masks/'
-    df["images"] = [np.array(load_image(path_images+"{}.png".format(idx))) for idx in tqdm_notebook(df.index)]
+    df["images"] = [np.array(load_image(path_images+"{}.png".format(idx), to_gray)) for idx in tqdm_notebook(df.index)]
     if train_data:
         df["masks"] = [np.array(load_image(path_masks+"{}.png".format(idx), mask=True)) for idx in tqdm_notebook(df.index)]
 
@@ -61,13 +64,13 @@ def LoadDataLists(DEV_MODE_RANGE = 0):
     print(train_df.shape, test_df.shape, depths_df.shape)
     return (train_df, test_df)
 
-def LoadData(train_data = True, DEV_MODE_RANGE = 0):
+def LoadData(train_data = True, DEV_MODE_RANGE = 0, to_gray=False):
     '''
     -> train_df, test_df
     '''
     train_df, test_df = LoadDataLists(DEV_MODE_RANGE)
     df = train_df if train_data else test_df
-    LoadImages(df, train_data)
+    LoadImages(df, train_data, to_gray)
     return df
     
 def SplitTrainData(train_df, test_fold_no):

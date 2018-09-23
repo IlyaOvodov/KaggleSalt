@@ -39,3 +39,20 @@ batch_size = 25
 0 - 0.87888
 1 - 0.89764
 2 - 
+
+После починки метрики
+
+доп аугм. 
+        albumentations.Resize(augmented_image_size, augmented_image_size),
+        albumentations.RandomScale(),
+        albumentations.HorizontalFlip(),
+        albumentations.RandomCrop(nn_image_size, nn_image_size),
+        albumentations.Normalize(mean = mean_val, std = mean_std, max_pixel_value = 1.0),
+
+        albumentations.Blur(),
+        albumentations.Rotate(limit=5),
+        albumentations.RandomBrightness(),
+        albumentations.RandomContrast(),
+models_2/FNN_resnet34_1.model - на вал. 0.80288
+Unet_inceptionv3_1.model_log - на вал. 0.78350
+model_kernel... 0.70275
