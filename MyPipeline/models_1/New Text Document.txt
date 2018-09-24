@@ -56,3 +56,4 @@ batch_size = 25
 models_2/FNN_resnet34_1.model - на вал. 0.80288
 Unet_inceptionv3_1.model_log - на вал. 0.78350
 model_kernel... 0.70275
+model_kernel... без аугментаций 0.75000 (batch_size = 20, lr: pat = 20, 0.2, 1e-6, 50)
