@@ -56,9 +56,12 @@ batch_size = 25
 models_2/FNN_resnet34_1.model - на вал. 0.80288
 Unet_inceptionv3_1.model_log - на вал. 0.78350
 model_kernel... 0.70275
-model_kernel... без аугментаций 0.75000 (batch_size = 20, lr: pat = 20, 0.2, 1e-6, 50)
+model_kernel... без аугментаций 0.75000 (batch_size = 20, lr: pat = 20, 0.2, 1e-5, 50)
 ... x224 0.74025
 ... x101 Epoch 00144: val_my_iou_metric did not improve from 0.77662
 ... x96  Epoch 00177: val_my_iou_metric did not improve from 0.80775 Вторая попытка Epoch 00161: val_my_iou_metric did not improve from 0.75012
 ... x96  Seg2 (+ nore_aug) Epoch 00136: val_my_iou_metric did not improve from 0.73037
 ... x96  batch_size = 40 (divrikwicky__1_x96_batch40) Epoch 00235: val_my_iou_metric did not improve from 0.81400
+kernel (batch_size = 25, lr: pat = 10, 0.2, 1e-5, 30)
+... x101 Epoch 00129: val_my_iou_metric did not improve from 0.79700
+
