@@ -60,3 +60,5 @@ model_kernel... без аугментаций 0.75000 (batch_size = 20, lr: pat = 20, 0.2, 1e-
 ... x224 0.74025
 ... x101 Epoch 00144: val_my_iou_metric did not improve from 0.77662
 ... x96  Epoch 00177: val_my_iou_metric did not improve from 0.80775
+Seg2 (+ aug)
+Epoch 00136: val_my_iou_metric did not improve from 0.73037
