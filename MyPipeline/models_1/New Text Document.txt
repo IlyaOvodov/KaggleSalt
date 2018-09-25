@@ -76,3 +76,4 @@ Unet_resnet34 seg1 batch_size = 20 factor=0.5, patience=10, min_lr=1e-6, patienc
  x224 Epoch 00143: val_my_iou_metric did not improve from 0.78700
 вторая попытка Epoch 00097: val_my_iou_metric did not improve from 0.75912
  x128 Epoch 00125: val_my_iou_metric did not improve from 0.76113
+ x101-96 Epoch 00059: val_my_iou_metric did not improve from 0.65400
