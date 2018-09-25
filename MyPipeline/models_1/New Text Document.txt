@@ -73,3 +73,5 @@ Unet inceptiuonv3 more aug batch_size = 20 factor=0.2, patience=20, min_lr=0.000
 Влияние разрешения
 Unet_resnet34 seg1 batch_size = 20 factor=0.5, patience=10, min_lr=1e-6, patience=50,
  x336 (по ошибке) Epoch 00143: val_my_iou_metric did not improve from 0.83712
+ x224 Epoch 00143: val_my_iou_metric did not improve from 0.78700
+вторая попытка Epoch 00097: val_my_iou_metric did not improve from 0.75912
