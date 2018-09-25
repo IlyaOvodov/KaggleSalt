@@ -65,3 +65,5 @@ model_kernel... без аугментаций 0.75000 (batch_size = 20, lr: pat = 20, 0.2, 1e-
 kernel (batch_size = 25, lr: pat = 10, 0.2, 1e-5, 30)
 ... x101 Epoch 00129: val_my_iou_metric did not improve from 0.79700
 
+Обновление albumentations:
+... x224 Epoch 00188: val_my_iou_metric did not improve from 0.76288
