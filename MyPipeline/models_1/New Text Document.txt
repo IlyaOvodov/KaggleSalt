@@ -69,3 +69,7 @@ kernel (batch_size = 25, lr: pat = 10, 0.2, 1e-5, 30)
 ... x224 Epoch 00188: val_my_iou_metric did not improve from 0.76288
 
 Unet inceptiuonv3 more aug batch_size = 20 factor=0.2, patience=20, min_lr=0.000001 patience=50 Epoch 00097: val_my_iou_metric did not improve from 0.70650
+
+Влияние разрешения
+Unet_resnet34 seg1 batch_size = 20 factor=0.5, patience=10, min_lr=1e-6, patience=50,
+ x336 (по ошибке) Epoch 00143: val_my_iou_metric did not improve from 0.83712
