@@ -80,3 +80,4 @@ Unet_resnet34 seg1 batch_size = 20 factor=0.5, patience=10, min_lr=1e-6, patienc
 
 FNN_resnet34 seg1
  x101-96 Epoch 00054: val_my_iou_metric did not improve from 0.53938
+ x128 Epoch 00156: val_my_iou_metric did not improve from 0.77338
