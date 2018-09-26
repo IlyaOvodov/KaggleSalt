@@ -324,10 +324,10 @@ def RunTest(params):
     # In[ ]:
 
 
-    early_stopping = EarlyStopping(monitor='val_my_iou_metric', mode = 'max', verbose=1, **params.EarlyStopping)
-    model_checkpoint = ModelCheckpoint(model_out_file, monitor='val_my_iou_metric',
-                                       mode = 'max', save_best_only=True, verbose=1)
-    reduce_lr = ReduceLROnPlateau(monitor='val_my_iou_metric', mode = 'max', verbose=1, **params.ReduceLROnPlateau)
+    early_stopping = EarlyStopping(monitor=params.monitor_metric[0], mode = params.monitor_metric[1], verbose=1, **params.EarlyStopping)
+    model_checkpoint = ModelCheckpoint(model_out_file,
+                                       monitor=params.monitor_metric[0], mode = params.monitor_metric[1], save_best_only=True, verbose=1)
+    reduce_lr = ReduceLROnPlateau(monitor=params.monitor_metric[0], mode = params.monitor_metric[1], verbose=1, **params.ReduceLROnPlateau)
 
     '''
     def get_callbacks(filepath, patience=2):
@@ -344,7 +344,7 @@ def RunTest(params):
                         callbacks=[early_stopping, model_checkpoint, reduce_lr, TQDMNotebookCallback(leave_inner=True),
                                   CSVLogger(log_out_file, separator=',', append=False)],
                         validation_steps=len(val_gen)*3,
-                        workers=1,
+                        workers=5,
                         use_multiprocessing=False,
                         verbose=0)
 
@@ -357,7 +357,7 @@ def RunTest(params):
                         callbacks=[early_stopping, model_checkpoint, reduce_lr, TQDMNotebookCallback(leave_inner=True),
                                   CSVLogger(log_out_file, separator=',', append=True)],
                         validation_steps=len(val_gen)*3,
-                        workers=1,
+                        workers=5,
                         use_multiprocessing=False,
                         verbose=0
                         )

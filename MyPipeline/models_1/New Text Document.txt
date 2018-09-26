@@ -88,9 +88,20 @@ x128 Epoch 00151: val_my_iou_metric did not improve from 0.76513
 
 seg_group
 FNN_resnet34 'batch_size' : 20, {'factor': 0.5, 'patience': 10, 'min_lr': 1e-06}, {'patience': 50}, adam
-336-224 Epoch 00250: val_my_iou_metric did not improve from 0.85538
-303-224 Epoch 00193: val_my_iou_metric did not improve from 0.83738
+336-224 Epoch 00250: val_my_iou_metric did not improve from 0.85538 0:34
+303-224 Epoch 00193: val_my_iou_metric did not improve from 0.83738 0:34
 224-224 Epoch 00113: val_my_iou_metric did not improve from 0.77925 0:34
+192-128 Epoch 00152: val_my_iou_metric did not improve from 0.81850
 128-128 Epoch 00250: val_my_iou_metric did not improve from 0.78600 00:17
 101-96  Epoch 00182: val_my_iou_metric did not improve from 0.74700 00:14
+
+FNN_resnet34 {'factor': 0.2, 'patience': 20}
+336-224 Epoch 00242: val_my_iou_metric did not improve from 0.84237
+224-224 Epoch 00172: val_my_iou_metric did not improve from 0.79825
+192-128 Epoch 00250: val_my_iou_metric did not improve from 0.82625
+128-128 Epoch 00152: val_my_iou_metric did not improve from 0.76325
+
+Train (not val_*) moninitor
+192-128 Epoch 00230: my_iou_metric did not improve from 0.88283 (not ended)
+128-128 Epoch 00250: my_iou_metric did not improve from 0.93618
 
