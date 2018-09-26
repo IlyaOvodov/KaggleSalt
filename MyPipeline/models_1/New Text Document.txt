@@ -85,3 +85,12 @@ FNN_resnet34 seg1
 seg3 
 Unet_resnet34 'batch_size' : 20, {'factor': 0.2, 'patience': 20, 'min_lr': 1e-06}, {'patience': 50},
 x128 Epoch 00151: val_my_iou_metric did not improve from 0.76513
+
+seg_group
+FNN_resnet34 'batch_size' : 20, {'factor': 0.5, 'patience': 10, 'min_lr': 1e-06}, {'patience': 50}, adam
+336-224 Epoch 00250: val_my_iou_metric did not improve from 0.85538
+303-224 Epoch 00193: val_my_iou_metric did not improve from 0.83738
+224-224 Epoch 00113: val_my_iou_metric did not improve from 0.77925 0:34
+128-128 Epoch 00250: val_my_iou_metric did not improve from 0.78600 00:17
+101-96  Epoch 00182: val_my_iou_metric did not improve from 0.74700 00:14
+
