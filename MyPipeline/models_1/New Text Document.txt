@@ -86,7 +86,8 @@ seg3
 Unet_resnet34 'batch_size' : 20, {'factor': 0.2, 'patience': 20, 'min_lr': 1e-06}, {'patience': 50},
 x128 Epoch 00151: val_my_iou_metric did not improve from 0.76513
 
-seg_group
+seg_group 
+BASE OPTION:
 FNN_resnet34 'batch_size' : 20, {'factor': 0.5, 'patience': 10, 'min_lr': 1e-06}, {'patience': 50}, adam
 336-224 Epoch 00250: val_my_iou_metric did not improve from 0.85538 0:34
 303-224 Epoch 00193: val_my_iou_metric did not improve from 0.83738 0:34
@@ -114,3 +115,14 @@ CC FNN_resnet34 'batch_size' : 20, {'factor': 0.5, 'patience': 10, 'min_lr': 1e-
 RndInit CC FNN_resnet34 'batch_size' : 20, {'factor': 0.5, 'patience': 10, 'min_lr': 1e-06}, {'patience': 50}, adam
 192-128 models_3/FNN_resnet34_adam_192-128_lrf0.5_CC_f1_5aa920.model Epoch 00215: val_my_iou_metric did not improve from 0.81125
 128-128 models_3/FNN_resnet34_adam_128-128_lrf0.5_CC_f1_9112fb.model Epoch 00182: val_my_iou_metric did not improve from 0.75313
+
+val_acc, imagenet init, FNN_resnet34 'batch_size' : 20, {'factor': 0.5, 'patience': 10, 'min_lr': 1e-06}, {'patience': 50}, adam
+models_3/FNN_resnet34_adam_336-224_lrf0.5_val_acc__f1_13a184.model Epoch 00191: val_acc 0.96198 my 0.818875
+models_3/FNN_resnet34_adam_224-224_lrf0.5_val_acc__f1_2d3849.model Epoch 00160: val_acc 0.95973 my 0.771125
+models_3/FNN_resnet34_adam_192-128_lrf0.5_val_acc__f1_115da3.model Epoch 00176: val_acc 0.95117 my 0.725749
+models_3/FNN_resnet34_adam_128-128_lrf0.5_val_acc__f1_8936ca.model Epoch 00170: val_acc 0.95803 my 0.765875
+
+test 3sigma norm
+models_3/FNN_resnet34_adam_192-128_lrf0.5_ns3.0_val_my_iou_metric__f1_e65381.model Epoch 00174: val_my_iou_metric did not improve from 0.81812
+models_3/FNN_resnet34_adam_128-128_lrf0.5_ns3.0_val_my_iou_metric__f1_23d80c.model Epoch 00146: val_my_iou_metric did not improve from 0.78550
+

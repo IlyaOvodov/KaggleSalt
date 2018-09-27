@@ -210,7 +210,7 @@ def RunTest(params):
             albumentations.Resize(params.augmented_image_size, params.augmented_image_size),
             albumentations.HorizontalFlip(),
             albumentations.RandomCrop(params.nn_image_size, params.nn_image_size),
-            albumentations.Normalize(mean = mean_val, std = mean_std, max_pixel_value = 1.0),
+            albumentations.Normalize(mean = mean_val, std = mean_std*params.norm_sigma_k, max_pixel_value = 1.0),
         ], p=p)
 
 
@@ -223,7 +223,7 @@ def RunTest(params):
             albumentations.RandomScale(0.04),
             albumentations.HorizontalFlip(),
             albumentations.RandomCrop(params.nn_image_size, params.nn_image_size),
-            albumentations.Normalize(mean = mean_val, std = mean_std, max_pixel_value = 1.0),
+            albumentations.Normalize(mean = mean_val, std = mean_std*params.norm_sigma_k, max_pixel_value = 1.0),
 
             albumentations.Blur(),
             albumentations.Rotate(limit=5),
@@ -314,10 +314,10 @@ def RunTest(params):
 
 
     #model1_file = 'models_1/{model_name}_{backbone_name}_{test_fold_no}.model'.format(model_name=model_name, backbone_name=backbone_name, test_fold_no=test_fold_no)
-    model_out_file = 'models_3/{model_name}_{backbone_name}_{optim}_{augw}-{nnw}_lrf{lrf}_{CC}_f{test_fold_no}_{phash}.model'.format(
+    model_out_file = 'models_3/{model_name}_{backbone_name}_{optim}_{augw}-{nnw}_lrf{lrf}_ns{norm_sigma_k}_{metric}_{CC}_f{test_fold_no}_{phash}.model'.format(
         model_name=params.model, backbone_name=params.backbone, optim=params.optimizer,
         augw = params.augmented_image_size, nnw = params.nn_image_size, lrf = params.ReduceLROnPlateau['factor'],
-		CC = 'CC' if params.coord_conv else '',
+		norm_sigma_k=params.norm_sigma_k, metric = params.monitor_metric[0], CC = 'CC' if params.coord_conv else '',
         test_fold_no=params.test_fold_no, phash = params_hash())
     params_save(model_out_file, verbose = True)
     log_out_file = model_out_file+'.log.csv'
