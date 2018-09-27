@@ -106,9 +106,11 @@ Train (not val_*) moninitor
 128-128 Epoch 00250: my_iou_metric did not improve from 0.93618
 
 CC FNN_resnet34 'batch_size' : 20, {'factor': 0.5, 'patience': 10, 'min_lr': 1e-06}, {'patience': 50}, adam
-336-224 Epoch 00186: val_my_iou_metric did not improve from 0.84737 models_3/FNN_resnet34_adam_336-224_lrf0.5_CC_f1_c1a528.model
-224-224 Epoch 00131: val_my_iou_metric did not improve from 0.79575 models_3/FNN_resnet34_adam_224-224_lrf0.5_CC_f1_9ec6ee.model
-192-128 Epoch 00161: val_my_iou_metric did not improve from 0.82600 models_3/FNN_resnet34_adam_192-128_lrf0.5_CC_f1_a70848.model
-128-128 Epoch 00100: val_my_iou_metric did not improve from 0.75975 models_3/FNN_resnet34_adam_128-128_lrf0.5_CC_f1_149e70.model
+336-224 models_3/FNN_resnet34_adam_336-224_lrf0.5_CC_f1_c1a528.model Epoch 00186: val_my_iou_metric did not improve from 0.84737
+224-224 models_3/FNN_resnet34_adam_224-224_lrf0.5_CC_f1_9ec6ee.model Epoch 00131: val_my_iou_metric did not improve from 0.79575
+192-128 models_3/FNN_resnet34_adam_192-128_lrf0.5_CC_f1_a70848.model Epoch 00161: val_my_iou_metric did not improve from 0.82600
+128-128 models_3/FNN_resnet34_adam_128-128_lrf0.5_CC_f1_149e70.model Epoch 00100: val_my_iou_metric did not improve from 0.75975
 
 RndInit CC FNN_resnet34 'batch_size' : 20, {'factor': 0.5, 'patience': 10, 'min_lr': 1e-06}, {'patience': 50}, adam
+192-128 models_3/FNN_resnet34_adam_192-128_lrf0.5_CC_f1_5aa920.model Epoch 00215: val_my_iou_metric did not improve from 0.81125
+128-128 models_3/FNN_resnet34_adam_128-128_lrf0.5_CC_f1_9112fb.model Epoch 00182: val_my_iou_metric did not improve from 0.75313
