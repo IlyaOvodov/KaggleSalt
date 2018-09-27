@@ -162,6 +162,38 @@ def RunTest(params):
     mean_val, mean_std 
 
 
+    #####################################
+    def FillCoordConvNumpy(imgs):
+        print(imgs.shape)
+        assert len(imgs.shape) == 4
+        assert imgs.shape[3] == 3
+        n = imgs.shape[2]
+        hor_img = np.linspace(mean_val-mean_std, mean_val+mean_std, n).reshape((1, 1,n,1)) 
+        n = imgs.shape[1]
+        ver_img = np.linspace(mean_val-mean_std, mean_val+mean_std, n).reshape((1, n,1,1)) 
+        imgs[:, :, :, 0:1] = hor_img
+        imgs[:, :, :, 2:3] = ver_img
+    def FillCoordConvList(imgs):
+        print(imgs.shape)
+        assert len(imgs[0].shape) == 3
+        assert imgs[0].shape[2] == 3
+        for img in imgs:
+            n = img.shape[1]
+            hor_img = np.linspace(mean_val-mean_std, mean_val+mean_std, n).reshape((1,n,1)) 
+            n = img.shape[0]
+            ver_img = np.linspace(mean_val-mean_std, mean_val+mean_std, n).reshape((n,1,1)) 
+            img[:, :, 0:1] = hor_img
+            img[:, :, 2:3] = ver_img
+    
+    if params.coord_conv:
+        FillCoordConvList(train_images)
+        FillCoordConvList(validate_images)
+        print (train_images[0][0,0,0], train_images[0][0,0,2])
+        assert train_images[0][0,0,0] == mean_val-mean_std
+        assert train_images[0][0,0,2] == mean_val-mean_std
+    
+    ######################################
+    
     # In[ ]:
 
 
@@ -282,9 +314,10 @@ def RunTest(params):
 
 
     #model1_file = 'models_1/{model_name}_{backbone_name}_{test_fold_no}.model'.format(model_name=model_name, backbone_name=backbone_name, test_fold_no=test_fold_no)
-    model_out_file = 'models_3/{model_name}_{backbone_name}_{optim}_{augw}-{nnw}_lrf{lrf}_f{test_fold_no}_{phash}.model'.format(
+    model_out_file = 'models_3/{model_name}_{backbone_name}_{optim}_{augw}-{nnw}_lrf{lrf}_{CC}_f{test_fold_no}_{phash}.model'.format(
         model_name=params.model, backbone_name=params.backbone, optim=params.optimizer,
         augw = params.augmented_image_size, nnw = params.nn_image_size, lrf = params.ReduceLROnPlateau['factor'],
+		CC = 'CC' if params.coord_conv else '',
         test_fold_no=params.test_fold_no, phash = params_hash())
     params_save(model_out_file, verbose = True)
     log_out_file = model_out_file+'.log.csv'
