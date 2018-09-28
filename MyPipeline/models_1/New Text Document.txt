@@ -122,7 +122,7 @@ models_3/FNN_resnet34_adam_224-224_lrf0.5_val_acc__f1_2d3849.model Epoch 00160: 
 models_3/FNN_resnet34_adam_192-128_lrf0.5_val_acc__f1_115da3.model Epoch 00176: val_acc 0.95117 my 0.725749
 models_3/FNN_resnet34_adam_128-128_lrf0.5_val_acc__f1_8936ca.model Epoch 00170: val_acc 0.95803 my 0.765875
 
-test 3sigma norm
+test 3sigma norm (?)
 224  - ?
 models_3/FNN_resnet34_adam_192-128_lrf0.5_ns3.0_val_my_iou_metric__f1_e65381.model Epoch 00174: val_my_iou_metric did not improve from 0.81812
 models_3/FNN_resnet34_adam_128-128_lrf0.5_ns3.0_val_my_iou_metric__f1_23d80c.model Epoch 00146: val_my_iou_metric did not improve from 0.78550
@@ -143,3 +143,7 @@ models_3/FNN_resnet34_adam_192-128_lrf0.5_ns1.0_val_my_iou_metric__f1_74e084.mod
 models_3/FNN_resnet34_adam_128-128_lrf0.5_ns1.0_val_my_iou_metric__f1_f3b7b7.model Epoch 00145: val_my_iou_metric did not improve from 0.78613
 
 Unet_resnet34
+models_3/Unet_resnet34_adam_336-224_lrf0.5_ns1.0_val_my_iou_metric__f1_2221ce.model Epoch 00112: val_my_iou_metric did not improve from 0.79573
+models_3/Unet_resnet34_adam_224-224_lrf0.5_ns1.0_val_my_iou_metric__f1_aa643b.model Epoch 00115: val_my_iou_metric did not improve from 0.77387
+models_3/Unet_resnet34_adam_192-128_lrf0.5_ns1.0_val_my_iou_metric__f1_80929b.model Epoch 00125: val_my_iou_metric did not improve from 0.80867
+models_3/Unet_resnet34_adam_128-128_lrf0.5_ns1.0_val_my_iou_metric__f1_81c3ef.model Epoch 00129: val_my_iou_metric did not improve from 0.77000
