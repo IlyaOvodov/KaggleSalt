@@ -147,3 +147,9 @@ models_3/Unet_resnet34_adam_336-224_lrf0.5_ns1.0_val_my_iou_metric__f1_2221ce.mo
 models_3/Unet_resnet34_adam_224-224_lrf0.5_ns1.0_val_my_iou_metric__f1_aa643b.model Epoch 00115: val_my_iou_metric did not improve from 0.77387
 models_3/Unet_resnet34_adam_192-128_lrf0.5_ns1.0_val_my_iou_metric__f1_80929b.model Epoch 00125: val_my_iou_metric did not improve from 0.80867
 models_3/Unet_resnet34_adam_128-128_lrf0.5_ns1.0_val_my_iou_metric__f1_81c3ef.model Epoch 00129: val_my_iou_metric did not improve from 0.77000
+
+Еще раз после правки iou (вероятно, не важной)
+models_3/FNN_resnet34_adam_336-224_lrf0.5_ns1.0_val_my_iou_metric__f1_f395f3.model Epoch 00121: val_my_iou_metric did not improve from 0.83533
+models_3/FNN_resnet34_adam_224-224_lrf0.5_ns1.0_val_my_iou_metric__f1_880273.model Epoch 00116: val_my_iou_metric did not improve from 0.79560
+models_3/FNN_resnet34_adam_192-128_lrf0.5_ns1.0_val_my_iou_metric__f1_130f8f.model Epoch 00193: val_my_iou_metric did not improve from 0.83267
+models_3/FNN_resnet34_adam_128-128_lrf0.5_ns1.0_val_my_iou_metric__f1_91c4ce.model Epoch 00111: val_my_iou_metric did not improve from 0.77880

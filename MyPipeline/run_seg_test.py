@@ -128,7 +128,7 @@ def RunTest(params):
         i = np.sum((img_true*img_pred) >0)
         u = np.sum((img_true + img_pred) >0)
         if u == 0:
-            return u
+            return 1
         return i/u
 
     def iou_metric(img_true, img_pred):
