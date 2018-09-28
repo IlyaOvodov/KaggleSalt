@@ -51,6 +51,8 @@ def RunTest(params):
     from imp import reload
     import numpy as np
     import keras
+    import datetime
+    import time
 
     from keras.models import Model, load_model
     from keras.layers import Input,Dropout,BatchNormalization,Activation,Add
@@ -248,10 +250,11 @@ def RunTest(params):
             self.indexes = np.arange(len(self.images))
             self.on_epoch_end()
             self.augmentation = aug_func()
+            assert len(self.images) >= self.batch_size
             
         def __len__(self):
             'Denotes the number of batches per epoch'
-            return int(np.ceil(len(self.images) / self.batch_size))
+            return int(np.floor(len(self.images) / self.batch_size))
 
         def __getitem__(self, index):
             'Generate one batch of data'
@@ -321,7 +324,8 @@ def RunTest(params):
         test_fold_no=params.test_fold_no, phash = params_hash())
     params_save(model_out_file, verbose = True)
     log_out_file = model_out_file+'.log.csv'
-    print('model:   ' + model_out_file)
+    now = datetime.datetime.now()
+    print('model:   ' + model_out_file + ' started at ' + now.strftime("%H:%M")) 
 
 
     # In[ ]:
@@ -344,7 +348,7 @@ def RunTest(params):
     train_gen = AlbuDataGenerator(train_images, train_masks, batch_size=params.batch_size,
                                   nn_image_size = params.nn_image_size, aug_func = basic_aug, shuffle=True)
     val_gen = AlbuDataGenerator(validate_images, validate_masks, batch_size=params.test_batch_size,
-                                nn_image_size = params.nn_image_size, aug_func = basic_aug, shuffle=False)
+                                nn_image_size = params.nn_image_size, aug_func = basic_aug, shuffle=True)
 
 
     # In[ ]:
@@ -356,6 +360,7 @@ def RunTest(params):
 
     # In[ ]:
 
+    start_t = time.clock()
 
     early_stopping = EarlyStopping(monitor=params.monitor_metric[0], mode = params.monitor_metric[1], verbose=1, **params.EarlyStopping)
     model_checkpoint = ModelCheckpoint(model_out_file,
@@ -398,7 +403,9 @@ def RunTest(params):
 
     # In[ ]:
 
-
     print(params_str())
     print('done:   ' + model_out_file)
+    print('elapsed: {}s ({}s/iter)'.format(time.clock() - start_t, (time.clock() - start_t)/len(history.epoch) ))
+
+    return model
 
