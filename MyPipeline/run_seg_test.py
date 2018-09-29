@@ -203,44 +203,34 @@ def RunTest(params):
     sys.path.insert(1, '../3rd_party/imgaug')
     import albumentations
 
-
-    # In[ ]:
-
-
-    def basic_aug(p=1.):
-        return albumentations.Compose([
-            albumentations.Resize(params.augmented_image_size, params.augmented_image_size),
-            albumentations.HorizontalFlip(),
-            albumentations.RandomCrop(params.nn_image_size, params.nn_image_size),
-            albumentations.Normalize(mean = mean_val, std = mean_std*params.norm_sigma_k, max_pixel_value = 1.0),
-        ], p=p)
-
-
-    # In[ ]:
-
-
-    def more_aug(p=1.):
-        return albumentations.Compose([
-            albumentations.Resize(params.augmented_image_size, params.augmented_image_size),
-            albumentations.RandomScale(0.04),
-            albumentations.HorizontalFlip(),
-            albumentations.RandomCrop(params.nn_image_size, params.nn_image_size),
-            albumentations.Normalize(mean = mean_val, std = mean_std*params.norm_sigma_k, max_pixel_value = 1.0),
-
-            albumentations.Blur(),
-            albumentations.Rotate(limit=5),
-            albumentations.RandomBrightness(),
-            albumentations.RandomContrast(),
-        ], p=p)
+    def common_aug(mode, p=1.):
+        '''
+        :param mode: 'more', 'inference', 'basic' ,
+        '''
+        assert mode in {'more', 'inference', 'basic',}
+        augs_list = [albumentations.Resize(params.augmented_image_size, params.augmented_image_size),]\
+        if mode != 'inference':
+            augs_list += [albumentations.HorizontalFlip(),]
+            if mode == 'more':
+                augs_list += [albumentations.RandomScale(0.04),]
+        augs_list += [albumentations.RandomCrop(params.nn_image_size, params.nn_image_size),
+                      albumentations.ToFloat(),
+                      albumentations.Normalize(mean=mean_val, std=mean_std * params.norm_sigma_k,
+                                               max_pixel_value=1.0), ]
+        if mode != 'inference':
+            if mode == 'more':
+                [albumentations.Blur(),
+                            #albumentations.Rotate(limit=5),
+                            albumentations.RandomBrightness(),
+                            albumentations.RandomContrast(),
+                            ]
+        return albumentations.Compose(augs_list, p=p)
 
 
-    # In[ ]:
-
-
-    import threading
+    #import threading
     class AlbuDataGenerator(keras.utils.Sequence):
         'Generates data for Keras'
-        def __init__(self, images, masks, batch_size, nn_image_size, shuffle, aug_func):
+        def __init__(self, images, masks, batch_size, nn_image_size, shuffle, mode):
             'Initialization'
             self.images = images
             self.masks = masks
@@ -249,7 +239,7 @@ def RunTest(params):
             self.shuffle = shuffle
             self.indexes = np.arange(len(self.images))
             self.on_epoch_end()
-            self.augmentation = aug_func()
+            self.augmentation = common_aug(mode)
             assert len(self.images) >= self.batch_size
             
         def __len__(self):
@@ -355,9 +345,9 @@ def RunTest(params):
 
 
     train_gen = AlbuDataGenerator(train_images, train_masks, batch_size=params.batch_size,
-                                  nn_image_size = params.nn_image_size, aug_func = basic_aug, shuffle=True)
+                                  nn_image_size = params.nn_image_size, aug_func = basic_aug(), shuffle=True)
     val_gen = AlbuDataGenerator(validate_images, validate_masks, batch_size=params.test_batch_size,
-                                nn_image_size = params.nn_image_size, aug_func = basic_aug, shuffle=True)
+                                nn_image_size = params.nn_image_size, aug_func = basic_aug(), shuffle=True)
 
 
     # In[ ]:
