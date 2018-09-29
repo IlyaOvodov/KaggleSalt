@@ -153,3 +153,12 @@ models_3/FNN_resnet34_adam_336-224_lrf0.5_ns1.0_val_my_iou_metric__f1_f395f3.mod
 models_3/FNN_resnet34_adam_224-224_lrf0.5_ns1.0_val_my_iou_metric__f1_880273.model Epoch 00116: val_my_iou_metric did not improve from 0.79560
 models_3/FNN_resnet34_adam_192-128_lrf0.5_ns1.0_val_my_iou_metric__f1_130f8f.model Epoch 00193: val_my_iou_metric did not improve from 0.83267
 models_3/FNN_resnet34_adam_128-128_lrf0.5_ns1.0_val_my_iou_metric__f1_91c4ce.model Epoch 00111: val_my_iou_metric did not improve from 0.77880 (др. попытка после рефакторинга Epoch 00112: 0.78053)
+
+Паддинг
+models_3/FNN_resnet34_adam_202-336-224_lrf0.5_val_my_iou_metric__f1_3706a2.model Epoch 00221: val_my_iou_metric did not improve from 0.81640
+models_3/FNN_resnet34_adam_256-384-128_lrf0.5_val_my_iou_metric__f1_e44264.model Epoch 00192: val_my_iou_metric did not improve from 0.85227
+models_3/FNN_resnet34_adam_192-224-128_lrf0.5_val_my_iou_metric__f1_66135d.model Epoch 00170: val_my_iou_metric did not improve from 0.84333
+models_3/FNN_resnet34_adam_128-128-128_lrf0.5_val_my_iou_metric__f1_e7c2f0.model Epoch 00136: val_my_iou_metric did not improve from 0.77787
+models_3/FNN_resnet34_adam_128-192-128_lrf0.5_val_my_iou_metric__f1_b6ec2f.model Epoch 00114: val_my_iou_metric did not improve from 0.78453
+models_3/FNN_resnet34_adam_101-192-128_lrf0.5_val_my_iou_metric__f1_c372fd.model Epoch 00191: val_my_iou_metric did not improve from 0.81360
+models_3/FNN_resnet34_adam_101-128-96_lrf0.5_val_my_iou_metric__f1_cc9e07.model Epoch 00211: val_my_iou_metric did not improve from 0.76187

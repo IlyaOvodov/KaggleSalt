@@ -7,19 +7,29 @@ sys.path.insert(1, '../3rd_party/albumentations')
 sys.path.insert(1, '../3rd_party/imgaug')
 import albumentations
 import keras
+import cv2
 
 def common_aug(mode, params, mean, p=1.):
     '''
     :param mode: 'more', 'inference', 'basic' ,
     '''
+    augs_list = []
     assert mode in {'more', 'inference', 'basic', }
-    augs_list = [albumentations.Resize(params.augmented_image_size, params.augmented_image_size), ]
+    assert max(params.augmented_image_size, params.padded_image_size) >= params.nn_image_size
+    augs_list += [albumentations.Resize(params.augmented_image_size, params.augmented_image_size), ]
+    if params.padded_image_size:
+        augs_list += [albumentations.PadIfNeeded(min_height=params.padded_image_size,
+                                                 min_width=params.padded_image_size,
+                                                 border_mode=cv2.BORDER_REFLECT_101),]
     if mode != 'inference':
         augs_list += [albumentations.HorizontalFlip(), ]
         if mode == 'more':
             augs_list += [albumentations.RandomScale(0.04), ]
-    augs_list += [albumentations.RandomCrop(params.nn_image_size, params.nn_image_size),
-                  albumentations.ToFloat(),
+    if mode != 'inference':
+        augs_list += [albumentations.RandomCrop(params.nn_image_size, params.nn_image_size),]
+    else:
+        augs_list += [albumentations.CenterCrop(params.nn_image_size, params.nn_image_size), ]
+    augs_list += [albumentations.ToFloat(),
                   albumentations.Normalize(mean=mean[0], std=mean[1] * params.norm_sigma_k,
                                            max_pixel_value=1.0), ]
     if mode != 'inference':

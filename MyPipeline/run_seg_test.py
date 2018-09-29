@@ -236,11 +236,12 @@ def RunTest(params):
 
     # In[ ]:
 
-    model_out_file = 'models_3/{model_name}_{backbone_name}_{optim}_{augw}-{nnw}_lrf{lrf}_ns{norm_sigma_k}_{metric}_{CC}_f{test_fold_no}_{phash}.model'.format(
-        model_name=params.model, backbone_name=params.backbone, optim=params.optimizer,
-        augw = params.augmented_image_size, nnw = params.nn_image_size, lrf = params.ReduceLROnPlateau['factor'],
-		norm_sigma_k=params.norm_sigma_k, metric = params.monitor_metric[0], CC = 'CC' if params.coord_conv else '',
-        test_fold_no=params.test_fold_no, phash = params_hash())
+    model_out_file = 'models_3/{model}_{backbone}_{optimizer}_{augmented_image_size}-{padded_image_size}-{nn_image_size}_lrf{lrf}_{metric}_{CC}_f{test_fold_no}_{phash}.model'.format(
+        lrf = params.ReduceLROnPlateau['factor'],
+		metric = params.monitor_metric[0],
+        CC = 'CC' if params.coord_conv else '',
+        phash = params_hash(),
+        **vars(params))
     now = datetime.datetime.now()
     print('model:   ' + model_out_file + '    started at ' + now.strftime("%Y.%m.%d %H:%M:%S"))
 
