@@ -1,4 +1,4 @@
-Image -> 303х303, crop 224x224, flip
+п»їImage -> 303С…303, crop 224x224, flip
 
 epochs_warmup = 2
 epochs = 150
@@ -40,9 +40,9 @@ batch_size = 25
 1 - 0.89764
 2 - 
 
-После починки метрики
+РџРѕСЃР»Рµ РїРѕС‡РёРЅРєРё РјРµС‚СЂРёРєРё
 
-доп аугм. 
+РґРѕРї Р°СѓРіРј. 
         albumentations.Resize(augmented_image_size, augmented_image_size),
         albumentations.RandomScale(),
         albumentations.HorizontalFlip(),
@@ -53,28 +53,28 @@ batch_size = 25
         albumentations.Rotate(limit=5),
         albumentations.RandomBrightness(),
         albumentations.RandomContrast(),
-models_2/FNN_resnet34_1.model - на вал. 0.80288
-Unet_inceptionv3_1.model_log - на вал. 0.78350
+models_2/FNN_resnet34_1.model - РЅР° РІР°Р». 0.80288
+Unet_inceptionv3_1.model_log - РЅР° РІР°Р». 0.78350
 model_kernel... 0.70275
-model_kernel... без аугментаций 0.75000 (batch_size = 20, lr: pat = 20, 0.2, 1e-5, 50)
+model_kernel... Р±РµР· Р°СѓРіРјРµРЅС‚Р°С†РёР№ 0.75000 (batch_size = 20, lr: pat = 20, 0.2, 1e-5, 50)
 ... x224 0.74025
 ... x101 Epoch 00144: val_my_iou_metric did not improve from 0.77662
-... x96  Epoch 00177: val_my_iou_metric did not improve from 0.80775 Вторая попытка Epoch 00161: val_my_iou_metric did not improve from 0.75012
+... x96  Epoch 00177: val_my_iou_metric did not improve from 0.80775 Р’С‚РѕСЂР°СЏ РїРѕРїС‹С‚РєР° Epoch 00161: val_my_iou_metric did not improve from 0.75012
 ... x96  Seg2 (+ nore_aug) Epoch 00136: val_my_iou_metric did not improve from 0.73037
 ... x96  batch_size = 40 (divrikwicky__1_x96_batch40) Epoch 00235: val_my_iou_metric did not improve from 0.81400
 kernel (batch_size = 25, lr: pat = 10, 0.2, 1e-5, 30)
 ... x101 Epoch 00129: val_my_iou_metric did not improve from 0.79700
 
-Обновление albumentations:
+РћР±РЅРѕРІР»РµРЅРёРµ albumentations:
 ... x224 Epoch 00188: val_my_iou_metric did not improve from 0.76288
 
 Unet inceptiuonv3 more aug batch_size = 20 factor=0.2, patience=20, min_lr=0.000001 patience=50 Epoch 00097: val_my_iou_metric did not improve from 0.70650
 
-Влияние разрешения
+Р’Р»РёСЏРЅРёРµ СЂР°Р·СЂРµС€РµРЅРёСЏ
 Unet_resnet34 seg1 batch_size = 20 factor=0.5, patience=10, min_lr=1e-6, patience=50,
- x336 (по ошибке) Epoch 00143: val_my_iou_metric did not improve from 0.83712
+ x336 (РїРѕ РѕС€РёР±РєРµ) Epoch 00143: val_my_iou_metric did not improve from 0.83712
  x224 Epoch 00143: val_my_iou_metric did not improve from 0.78700
-вторая попытка Epoch 00097: val_my_iou_metric did not improve from 0.75912
+РІС‚РѕСЂР°СЏ РїРѕРїС‹С‚РєР° Epoch 00097: val_my_iou_metric did not improve from 0.75912
  x128 Epoch 00125: val_my_iou_metric did not improve from 0.76113
  x101-96 Epoch 00059: val_my_iou_metric did not improve from 0.65400
 
@@ -136,7 +136,7 @@ models_3/FNN_resnet34_adam_224-224_lrf0.5_ns3.0_val_my_iou_metric__f1_000a45.mod
 models_3/FNN_resnet34_adam_192-128_lrf0.5_ns3.0_val_my_iou_metric__f1_0a8cae.model Epoch 00145: val_my_iou_metric did not improve from 0.83187
 models_3/FNN_resnet34_adam_128-128_lrf0.5_ns3.0_val_my_iou_metric__f1_09fe60.model Epoch 00122: val_my_iou_metric did not improve from 0.77360
 
-То же на 1 sigma
+РўРѕ Р¶Рµ РЅР° 1 sigma
 models_3/FNN_resnet34_adam_336-224_lrf0.5_ns1.0_val_my_iou_metric__f1_4bb61f.model Epoch 00142: val_my_iou_metric did not improve from 0.83533
 models_3/FNN_resnet34_adam_224-224_lrf0.5_ns1.0_val_my_iou_metric__f1_7ae1d8.model Epoch 00118: val_my_iou_metric did not improve from 0.79907
 models_3/FNN_resnet34_adam_192-128_lrf0.5_ns1.0_val_my_iou_metric__f1_74e084.model Epoch 00136: val_my_iou_metric did not improve from 0.83547
@@ -148,8 +148,8 @@ models_3/Unet_resnet34_adam_224-224_lrf0.5_ns1.0_val_my_iou_metric__f1_aa643b.mo
 models_3/Unet_resnet34_adam_192-128_lrf0.5_ns1.0_val_my_iou_metric__f1_80929b.model Epoch 00125: val_my_iou_metric did not improve from 0.80867
 models_3/Unet_resnet34_adam_128-128_lrf0.5_ns1.0_val_my_iou_metric__f1_81c3ef.model Epoch 00129: val_my_iou_metric did not improve from 0.77000
 
-Еще раз после правки iou (вероятно, не важной)
+Р•С‰Рµ СЂР°Р· РїРѕСЃР»Рµ РїСЂР°РІРєРё iou (РІРµСЂРѕСЏС‚РЅРѕ, РЅРµ РІР°Р¶РЅРѕР№)
 models_3/FNN_resnet34_adam_336-224_lrf0.5_ns1.0_val_my_iou_metric__f1_f395f3.model Epoch 00121: val_my_iou_metric did not improve from 0.83533
 models_3/FNN_resnet34_adam_224-224_lrf0.5_ns1.0_val_my_iou_metric__f1_880273.model Epoch 00116: val_my_iou_metric did not improve from 0.79560
 models_3/FNN_resnet34_adam_192-128_lrf0.5_ns1.0_val_my_iou_metric__f1_130f8f.model Epoch 00193: val_my_iou_metric did not improve from 0.83267
-models_3/FNN_resnet34_adam_128-128_lrf0.5_ns1.0_val_my_iou_metric__f1_91c4ce.model Epoch 00111: val_my_iou_metric did not improve from 0.77880
+models_3/FNN_resnet34_adam_128-128_lrf0.5_ns1.0_val_my_iou_metric__f1_91c4ce.model Epoch 00111: val_my_iou_metric did not improve from 0.77880 (РґСЂ. РїРѕРїС‹С‚РєР° РїРѕСЃР»Рµ СЂРµС„Р°РєС‚РѕСЂРёРЅРіР° Epoch 00112: 0.78053)
