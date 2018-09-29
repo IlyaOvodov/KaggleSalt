@@ -29,16 +29,16 @@ def load_image(path, mask = False, to_gray=False):
     if mask:
         # Convert mask to 0 and 1 format
         img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        img = torch.from_numpy(img // 255)
-        return img.float()
+        img = (img // 255).astype(np.float32)
+        return img
     else:
         if to_gray:
             img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        img = torch.from_numpy(img / 255.0)
+        img = (img / 255.0).astype(np.float32)
         if to_gray:
             img = img.reshape((img.shape[0],img.shape[1],1))
         return img
-        #return img.float().reshape((img.shape[0],img.shape[1],1)).permute([2, 0, 1])
+        #torch return  torch.from_numpy(img).float().reshape((img.shape[0],img.shape[1],1)).permute([2, 0, 1])
 
 def LoadImages(df, train_data = True, to_gray=False):
     path = path_train if train_data else path_test
