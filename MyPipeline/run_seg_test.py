@@ -300,38 +300,47 @@ def RunTest(params):
 
     # In[ ]:
 
-
-    model = None
-    if params.model == 'FNN':
-        model = segmentation_models.FPN(backbone_name=params.backbone, input_shape=(None, None, params.channels),
-                                        encoder_weights=params.initial_weightns, freeze_encoder=True)
-    if params.model == 'Unet':
-        model = segmentation_models.Unet(backbone_name=params.backbone, input_shape=(None, None, params.channels),
-                                         encoder_weights=params.initial_weightns, freeze_encoder=True)
-    if params.model == 'divrikwicky':
-        model = keras_unet_divrikwicky_model.CreateModel(nn_image_size)
-        params.backbone = ''
+    if params.load_model_from:
+        model = load_model(params.load_model_from,
+                           custom_objects={'my_iou_metric': my_iou_metric}
+                           )
+        print('MODEL LOADED from: ' + params.load_model_from)
+    else:
+        model = None
+        if params.model == 'FNN':
+            model = segmentation_models.FPN(backbone_name=params.backbone, input_shape=(None, None, params.channels),
+                                            encoder_weights=params.initial_weightns, freeze_encoder=True)
+        if params.model == 'Unet':
+            model = segmentation_models.Unet(backbone_name=params.backbone, input_shape=(None, None, params.channels),
+                                             encoder_weights=params.initial_weightns, freeze_encoder=True)
+        if params.model == 'Linknet':
+            model = segmentation_models.Linknet(backbone_name=params.backbone, input_shape=(None, None, params.channels),
+                                                encoder_weights=params.initial_weightns, freeze_encoder=True)
+        if params.model == 'divrikwicky':
+            model = keras_unet_divrikwicky_model.CreateModel(nn_image_size)
+            params.backbone = ''
 
 
     # In[ ]:
 
-
-    #model1_file = 'models_1/{model_name}_{backbone_name}_{test_fold_no}.model'.format(model_name=model_name, backbone_name=backbone_name, test_fold_no=test_fold_no)
     model_out_file = 'models_3/{model_name}_{backbone_name}_{optim}_{augw}-{nnw}_lrf{lrf}_ns{norm_sigma_k}_{metric}_{CC}_f{test_fold_no}_{phash}.model'.format(
         model_name=params.model, backbone_name=params.backbone, optim=params.optimizer,
         augw = params.augmented_image_size, nnw = params.nn_image_size, lrf = params.ReduceLROnPlateau['factor'],
 		norm_sigma_k=params.norm_sigma_k, metric = params.monitor_metric[0], CC = 'CC' if params.coord_conv else '',
         test_fold_no=params.test_fold_no, phash = params_hash())
+    now = datetime.datetime.now()
+    print('model:   ' + model_out_file + '    started at ' + now.strftime("%Y.%m.%d %H:%M:%S"))
+
+    assert not os.path.exists(model_out_file)
+
     params_save(model_out_file, verbose = True)
     log_out_file = model_out_file+'.log.csv'
-    now = datetime.datetime.now()
-    print('model:   ' + model_out_file + ' started at ' + now.strftime("%H:%M")) 
 
 
     # In[ ]:
 
 
-    #model = load_model(model1_file, custom_objects={'my_iou_metric': my_iou_metric}) #, 'lavazs_loss': lavazs_loss
+    #model = load_model(model1_file, ) #, 'lavazs_loss': lavazs_loss
 
 
     # # Train
