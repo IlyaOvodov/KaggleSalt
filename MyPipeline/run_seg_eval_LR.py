@@ -236,7 +236,7 @@ def RunTest(params):
 
     # In[ ]:
 
-    model_out_file = 'models_3/{model}_{backbone}_{optimizer}_{augmented_image_size}-{padded_image_size}-{nn_image_size}_lrf{lrf}_{metric}_{CC}_f{test_fold_no}_{phash}.model'.format(
+    model_out_file = 'models_3/{model}_{backbone}_{optimizer}_{augmented_image_size}-{padded_image_size}-{nn_image_size}_LReval_f{test_fold_no}_{phash}.model'.format(
         lrf = params.ReduceLROnPlateau['factor'],
 		metric = params.monitor_metric[0],
         CC = 'CC' if params.coord_conv else '',
@@ -262,7 +262,7 @@ def RunTest(params):
     # In[ ]:
 
 
-    model.compile(loss="binary_crossentropy", optimizer=params.optimizer, metrics=["acc", my_iou_metric]) #, my_iou_metric
+    model.compile(loss="binary_crossentropy", optimizer="sgd", metrics=["acc", my_iou_metric]) #, my_iou_metric
 
 
     # In[ ]:
@@ -285,24 +285,22 @@ def RunTest(params):
 
     start_t = time.clock()
 
-    early_stopping = EarlyStopping(monitor=params.monitor_metric[0], mode = params.monitor_metric[1], verbose=1, **params.EarlyStopping)
-    model_checkpoint = ModelCheckpoint(model_out_file,
-                                       monitor=params.monitor_metric[0], mode = params.monitor_metric[1], save_best_only=True, verbose=1)
-    reduce_lr = ReduceLROnPlateau(monitor=params.monitor_metric[0], mode = params.monitor_metric[1], verbose=1, **params.ReduceLROnPlateau)
+    def lr_schedule_func(epoch, lr):
+        lr0 = 1e-5
+        lr1 = 1e-1
+        if epoch < params.epochs_warmup:
+            return lr1
+        else:
+            return lr0 * pow((lr1 / lr0), ((epoch - params.epochs_warmup) / (params.epochs - params.epochs_warmup)))
 
-    '''
-    def get_callbacks(filepath, patience=2):
-        es = EarlyStopping('val_loss', patience=patience, mode="min")
-        msave = ModelCheckpoint(filepath + '.hdf5', save_best_only=True)
-        csv_logger = CSVLogger(filepath+'_log.csv', separator=',', append=False)
-        return [es, msave, csv_logger]
-    '''
-        
+    lr_sheduler = keras.callbacks.LearningRateScheduler(lr_schedule_func, verbose=1)
+
     if params.epochs_warmup:
       history = model.fit_generator(train_gen,
                         validation_data=val_gen, 
                         epochs=params.epochs_warmup,
-                        callbacks=[early_stopping, model_checkpoint, reduce_lr, TQDMNotebookCallback(leave_inner=True),
+                        callbacks=[TQDMNotebookCallback(leave_inner=True),
+                                   lr_sheduler,
                                   CSVLogger(log_out_file, separator=',', append=False)],
                         validation_steps=len(val_gen)*3,
                         workers=5,
@@ -315,7 +313,8 @@ def RunTest(params):
                         validation_data=val_gen, 
                         epochs=params.epochs,
                         initial_epoch = params.epochs_warmup,
-                        callbacks=[early_stopping, model_checkpoint, reduce_lr, TQDMNotebookCallback(leave_inner=True),
+                        callbacks=[TQDMNotebookCallback(leave_inner=True),
+                                   lr_sheduler,
                                   CSVLogger(log_out_file, separator=',', append=True)],
                         validation_steps=len(val_gen)*3,
                         workers=5,

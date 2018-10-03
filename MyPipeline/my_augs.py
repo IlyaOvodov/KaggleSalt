@@ -46,7 +46,7 @@ def common_aug(mode, params, mean, p=1.):
 class AlbuDataGenerator(keras.utils.Sequence):
     'Generates data for Keras'
 
-    def __init__(self, images, masks, batch_size, nn_image_size, shuffle, mode, params, mean):
+    def __init__(self, images, masks, batch_size, nn_image_size, shuffle, mode, params, mean, use_ceil=False):
         'Initialization'
         self.images = images
         self.masks = masks
@@ -57,11 +57,13 @@ class AlbuDataGenerator(keras.utils.Sequence):
         self.on_epoch_end()
         self.augmentation = common_aug(mode, params, mean)
         self.channels = params.channels
+        self.use_ceil = use_ceil
         assert len(self.images) >= self.batch_size
 
     def __len__(self):
         'Denotes the number of batches per epoch'
-        return int(np.floor(len(self.images) / self.batch_size))
+        func = np.ceil if self.use_ceil else np.floor
+        return int(func(len(self.images) / self.batch_size))
 
     def __getitem__(self, index):
         'Generate one batch of data'
