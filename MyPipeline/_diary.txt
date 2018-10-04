@@ -166,10 +166,19 @@ models_3/FNN_resnet34_adam_101-128-96_lrf0.5_val_my_iou_metric__f1_cc9e07.model 
 Оценка по inference mode
 models_3/FNN_resnet34_adam_224-224-224_lrf0.5_val_my_iou_metric__f1_860c1b.model Epoch 00144: val_my_iou_metric did not improve from 0.79293  43
 models_3/FNN_resnet34_adam_224-336-224_lrf0.5_val_my_iou_metric__f1_3dbb84.model Epoch 00183: val_my_iou_metric did not improve from 0.81360  44   0.814 (224) 0.805 (320)
-models_3/FNN_resnet34_adam_202-336-224_lrf0.5_val_my_iou_metric__f1_f89b4b.model Epoch 00250: val_my_iou_metric did not improve from 0.80973  39
+models_3/FNN_resnet34_adam_202-336-224_lrf0.5_val_my_iou_metric__f1_f89b4b.model Epoch 00250: val_my_iou_metric did not improve from 0.80973  39  0.813(224) 0.807(320)
 models_3/FNN_resnet34_adam_256-384-128_lrf0.5_val_my_iou_metric__f1_6e6b73.model Epoch 00178: val_my_iou_metric did not improve from 0.85507  21
 models_3/FNN_resnet34_adam_192-224-128_lrf0.5_val_my_iou_metric__f1_28ebc3.model Epoch 00185: val_my_iou_metric did not improve from 0.83400  19.6 0.709 (224) 0.736 (192)
 models_3/FNN_resnet34_adam_128-128-128_lrf0.5_val_my_iou_metric__f1_be6ace.model Epoch 00120: val_my_iou_metric did not improve from 0.75947  19.1 0.76146 
 models_3/FNN_resnet34_adam_128-192-128_lrf0.5_val_my_iou_metric__f1_71760e.model Epoch 00210: val_my_iou_metric did not improve from 0.75920  18.1 0.717 (192) 
 models_3/FNN_resnet34_adam_101-192-128_lrf0.5_val_my_iou_metric__f1_aee606.model Epoch 00147: val_my_iou_metric did not improve from 0.77893  17.9 0.785 (128) 0.78(192)
 models_3/FNN_resnet34_adam_101-128-96_lrf0.5_val_my_iou_metric__f1_6f31a4.model Epoch 00221: val_my_iou_metric did not improve from 0.64920      14.0 0.6348
+
+то же, тест divrikwicky
+models_3/divrikwicky__adam_224-224-224_lrf0.5_val_my_iou_metric__f1_87d870.model Epoch 00086: val_my_iou_metric did not improve from 0.74213  57
+models_3/divrikwicky__adam_224-336-224_lrf0.5_val_my_iou_metric__f1_292ccb.model Epoch 00124: val_my_iou_metric did not improve from 0.74547  55
+models_3/divrikwicky__adam_128-192-128_lrf0.5_val_my_iou_metric__f1_25454c.model Epoch 00216: val_my_iou_metric did not improve from 0.79653  22
+models_3/divrikwicky__adam_128-128-128_lrf0.5_val_my_iou_metric__f1_75b76f.model Epoch 00124: val_my_iou_metric did not improve from 0.78707  22
+
+
+

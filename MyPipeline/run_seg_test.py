@@ -230,7 +230,7 @@ def RunTest(params):
             model = segmentation_models.Linknet(backbone_name=params.backbone, input_shape=(None, None, params.channels),
                                                 encoder_weights=params.initial_weightns, freeze_encoder=True)
         if params.model == 'divrikwicky':
-            model = keras_unet_divrikwicky_model.CreateModel(nn_image_size)
+            model = keras_unet_divrikwicky_model.CreateModel(params.nn_image_size)
             params.backbone = ''
 
 

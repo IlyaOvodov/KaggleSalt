@@ -1,4 +1,4 @@
-
+from my_callbacks import EvalLrTest
 # coding: utf-8
 
 def RunTest(params):
@@ -285,38 +285,33 @@ def RunTest(params):
 
     start_t = time.clock()
 
-    def lr_schedule_func(epoch, lr):
-        lr0 = 1e-5
-        lr1 = 1e-1
-        if epoch < params.epochs_warmup:
-            return lr1
-        else:
-            return lr0 * pow((lr1 / lr0), ((epoch - params.epochs_warmup) / (params.epochs - params.epochs_warmup)))
-
-    lr_sheduler = keras.callbacks.LearningRateScheduler(lr_schedule_func, verbose=1)
-
     if params.epochs_warmup:
       history = model.fit_generator(train_gen,
                         validation_data=val_gen, 
                         epochs=params.epochs_warmup,
-                        callbacks=[TQDMNotebookCallback(leave_inner=True),
-                                   lr_sheduler,
-                                  CSVLogger(log_out_file, separator=',', append=False)],
+                        callbacks=[TQDMNotebookCallback(leave_inner=True)],
                         validation_steps=len(val_gen)*3,
                         workers=5,
                         use_multiprocessing=False,
                         verbose=0)
 
     set_trainable(model)
+    batches_per_epoch = len(train_images)//params.batch_size
+    print("batches per epoch: ", batches_per_epoch)
+    test_epochs = 30
+    steps = test_epochs * batches_per_epoch
+    val_period = steps//1000
+    print("steps: ", steps, " val_period", val_period)
+
+    lr_sheduler = EvalLrTest(log_out_file, val_gen, val_period = val_period, steps=steps)
 
     history = model.fit_generator(train_gen,
-                        validation_data=val_gen, 
+                        validation_data=None,
                         epochs=params.epochs,
                         initial_epoch = params.epochs_warmup,
                         callbacks=[TQDMNotebookCallback(leave_inner=True),
-                                   lr_sheduler,
-                                  CSVLogger(log_out_file, separator=',', append=True)],
-                        validation_steps=len(val_gen)*3,
+                                   lr_sheduler],
+                        validation_steps=None,
                         workers=5,
                         use_multiprocessing=False,
                         verbose=0
@@ -331,3 +326,43 @@ def RunTest(params):
 
     return model
 
+if __name__== "__main__":
+    params = {
+        'seed': 241075,
+        'model': 'FNN',
+        'backbone': 'resnet34',
+        'initial_weightns': 'imagenet',
+        'optimizer': 'adam',
+        'augmented_image_size': 128,
+        'padded_image_size': 192,
+        'nn_image_size': 128,
+        'channels': 3,
+        'coord_conv': False,  # default False. CoordinatesConv layers (R and B channels)
+        'norm_sigma_k': 1.,
+
+        'load_model_from': None,  # 'models_1/FNN_resnet34_adam_960x544_f1_9e2580.model',
+
+        'train_augmentation_mode': 'basic',
+        'test_augmentation_mode': 'inference',
+
+        'epochs_warmup': 2,
+        'epochs': 102,
+        'batch_size': 20,
+        'test_batch_size': 50,
+
+        'monitor_metric': ('val_my_iou_metric', 'max'),  # default 'val_my_iou_metric'
+
+        'ReduceLROnPlateau': {
+            'factor': 0.5,
+            'patience': 10,
+            'min_lr': 1e-6,
+        },
+        'EarlyStopping': {'patience': 50},
+
+        'test_fold_no': 1,
+
+        'attempt': 1,
+        'comment': '',
+    }
+    params = type("params", (object,), params)
+    RunTest(params)
