@@ -222,7 +222,12 @@ def RunTest(params):
         model = None
         if params.model == 'FNN':
             model = segmentation_models.FPN(backbone_name=params.backbone, input_shape=(None, None, params.channels),
-                                            encoder_weights=params.initial_weightns, freeze_encoder=True)
+                                            encoder_weights=params.initial_weightns, freeze_encoder=True,
+                                            dropout = params.dropout, use_batchnorm=False, interpolation = params.interpolation)
+        if params.model == 'FNNdrop':
+            model = segmentation_models.FPNdrop(backbone_name=params.backbone, input_shape=(None, None, params.channels),
+                                            encoder_weights=params.initial_weightns, freeze_encoder=True,
+                                            dropout = params.dropout, use_batchnorm=False, interpolation = params.interpolation)
         if params.model == 'Unet':
             model = segmentation_models.Unet(backbone_name=params.backbone, input_shape=(None, None, params.channels),
                                              encoder_weights=params.initial_weightns, freeze_encoder=True)
@@ -232,7 +237,7 @@ def RunTest(params):
         if params.model == 'divrikwicky':
             model = keras_unet_divrikwicky_model.CreateModel(params.nn_image_size)
             params.backbone = ''
-
+        assert model
 
     # In[ ]:
 
@@ -346,3 +351,36 @@ def RunTest(params):
 
     return model
 
+if __name__== "__main__":
+    params = {
+        'seed': 241075,
+        'model': 'FNNdrop',
+        'backbone': 'resnet34',
+        'initial_weightns': 'imagenet',
+        'dropout': 0.3,
+        'interpolation': 'nearest',  # 'bilinear',
+        'optimizer': 'sgd',
+        'optimizer_params': {'momentum': 0.9, 'nesterov': True},
+        'cosine_annealing_params': {'min_lr': 1e-05, 'max_lr': 0.02, 'period': 20, 'verbose': 1},
+        'augmented_image_size': 101,
+        'padded_image_size': 192,
+        'nn_image_size': 128,
+        'channels': 3,
+        'coord_conv': False,
+        'norm_sigma_k': 1.0,
+        'load_model_from': None,
+        'train_augmentation_mode': 'basic',
+        'test_augmentation_mode': 'inference',
+        'epochs_warmup': 2,
+        'epochs': 300,
+        'batch_size': 20,
+        'test_batch_size': 50,
+        'monitor_metric': ('val_my_iou_metric', 'max'),
+        'ReduceLROnPlateau': {'factor': 0.5, 'patience': 10, 'min_lr': 1e-05},
+        'EarlyStopping': {'patience': 50},
+        'test_fold_no': 1,
+        'attempt': 0,
+        'comment': '',
+    }
+    params = type("params", (object,), params)
+    RunTest(params)
