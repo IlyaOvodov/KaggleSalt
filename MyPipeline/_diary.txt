@@ -1,44 +1,4 @@
-﻿Image -> 303х303, crop 224x224, flip
-
-epochs_warmup = 2
-epochs = 150
-batch_size = 25
-
-early_stopping = EarlyStopping(monitor='val_my_iou_metric', mode = 'max',patience=30, verbose=1)
-model_checkpoint = ModelCheckpoint(model_out_file, monitor='val_my_iou_metric',
-                                   mode = 'max', save_best_only=True, verbose=1)
-reduce_lr = ReduceLROnPlateau(monitor='val_my_iou_metric', mode = 'max',factor=0.2, patience=10, min_lr=0.00001, verbose=1)
-
-FNN_resnet
-0 - (0.869, 0.873, 0.861), 0.8592 (0.4816714219998361, 0.11148821093364449)
-1 - 0.89748  _0.8095_ (0.4823356019939591, 0.11072641306201825) 
-2 - 0.87859 (0.48151992257053783, 0.11100193150532368)
-3 - 0.8715 (0.4812546094802983, 0.11139168313624472)
-4 - ,0.8589 * (0.481104027852686, 0.11080583023478532)
-----------------------
-0.481577, 0.11108
-
-* V4 - 
-Epoch 00046: val_my_iou_metric improved from 0.83413 to 0.85210, saving model to models_1/FNN_resnet34_4.model
-Epoch 46
-
-
-FNN_inceptionv3
-- 0.602
-
-Resnet152
-batch_size = 20
-0 - 0.86381
-1 - 0.89109
-2 - 0.86637 0.606*
-3 - 0.87229 0.86088*
-4 - 0.85498 0.85474*
-
-Unet_resnet34 
-batch_size = 25
-0 - 0.87888
-1 - 0.89764
-2 - 
+Mean, std: 0.481577, 0.11108
 
 После починки метрики
 
@@ -180,5 +140,13 @@ models_3/divrikwicky__adam_224-336-224_lrf0.5_val_my_iou_metric__f1_292ccb.model
 models_3/divrikwicky__adam_128-192-128_lrf0.5_val_my_iou_metric__f1_25454c.model Epoch 00216: val_my_iou_metric did not improve from 0.79653  22
 models_3/divrikwicky__adam_128-128-128_lrf0.5_val_my_iou_metric__f1_75b76f.model Epoch 00124: val_my_iou_metric did not improve from 0.78707  22
 
+косинусный отжиг 
+'optimizer': 'sgd', 'optimizer_params': {},
+'cosine_annealing_params' : {'min_lr' : 1.e-5, 'max_lr': 2.e-2, 'period' : 20, 'verbose' : 1},
 
-
+FNN_resnet34_sgd_101-192-128_lrf0.5_val_my_iou_metric__f1_f5b619 120ep 'val_my_iou_metric': 0.761 0.764(128)
++ momentum & Nesterov
+FNN_resnet34_sgd_202-336-224_lrf0.5_val_my_iou_metric__f1_60a410 300 0.8256(.10) 0.8266(.14) test 0.8311(.10, 224), 0.8231(.10 320), 0.8258(.14 224)
+Сильное переобучение по loss начинается уже после 40 итерации. Но iou продолжает улучшаться до 250--300
+FNN_resnet34_sgd_101-192-128_lrf0.5_val_my_iou_metric__f1_cab178 300  0.8034(.11) test 0.8050 (.11 128)
+Сильное переобучение по loss начинается уже после 40 итерации, после 80 loss увеличивается. Но iou продолжает улучшаться до 150--300

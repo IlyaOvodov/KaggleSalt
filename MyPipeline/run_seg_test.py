@@ -236,7 +236,7 @@ def RunTest(params):
 
     # In[ ]:
 
-    model_out_file = 'models_3/{model}_{backbone}_{optimizer}_{augmented_image_size}-{padded_image_size}-{nn_image_size}_lrf{lrf}_{metric}_{CC}_f{test_fold_no}_{phash}.model'.format(
+    model_out_file = 'models_3/{model}_{backbone}_{optimizer}_{augmented_image_size}-{padded_image_size}-{nn_image_size}_lrf{lrf}_{metric}_{CC}_f{test_fold_no}_{phash}'.format(
         lrf = params.ReduceLROnPlateau['factor'],
 		metric = params.monitor_metric[0],
         CC = 'CC' if params.coord_conv else '',
@@ -245,7 +245,7 @@ def RunTest(params):
     now = datetime.datetime.now()
     print('model:   ' + model_out_file + '    started at ' + now.strftime("%Y.%m.%d %H:%M:%S"))
 
-    assert not os.path.exists(model_out_file)
+    assert not os.path.exists(model_out_file + '.model')
 
     params_save(model_out_file, verbose = True)
     log_out_file = model_out_file+'.log.csv'
@@ -261,8 +261,13 @@ def RunTest(params):
 
     # In[ ]:
 
+    optimizer=params.optimizer
+    if optimizer == 'adam':
+        optimizer = keras.optimizers.adam(**params.optimizer_params)
+    elif optimizer == 'sgd':
+        optimizer = keras.optimizers.sgd(**params.optimizer_params)
 
-    model.compile(loss="binary_crossentropy", optimizer=params.optimizer, metrics=["acc", my_iou_metric]) #, my_iou_metric
+    model.compile(loss="binary_crossentropy", optimizer=optimizer, metrics=["acc", my_iou_metric]) #, my_iou_metric
 
 
     # In[ ]:
@@ -285,10 +290,14 @@ def RunTest(params):
 
     start_t = time.clock()
 
-    early_stopping = EarlyStopping(monitor=params.monitor_metric[0], mode = params.monitor_metric[1], verbose=1, **params.EarlyStopping)
-    model_checkpoint = ModelCheckpoint(model_out_file,
-                                       monitor=params.monitor_metric[0], mode = params.monitor_metric[1], save_best_only=True, verbose=1)
-    reduce_lr = ReduceLROnPlateau(monitor=params.monitor_metric[0], mode = params.monitor_metric[1], verbose=1, **params.ReduceLROnPlateau)
+    early_stopping = EarlyStopping(monitor=params.monitor_metric[0], mode=params.monitor_metric[1], verbose=1,
+                                   **params.EarlyStopping)
+    model_checkpoint = ModelCheckpoint(model_out_file + '.model',
+                                       monitor=params.monitor_metric[0], mode=params.monitor_metric[1],
+                                       save_best_only=True, verbose=1)
+    reduce_lr = ReduceLROnPlateau(monitor=params.monitor_metric[0], mode=params.monitor_metric[1], verbose=1,
+                                  **params.ReduceLROnPlateau)
+    callbacks = [early_stopping, model_checkpoint, reduce_lr, ]
 
     '''
     def get_callbacks(filepath, patience=2):
@@ -302,22 +311,27 @@ def RunTest(params):
       history = model.fit_generator(train_gen,
                         validation_data=val_gen, 
                         epochs=params.epochs_warmup,
-                        callbacks=[early_stopping, model_checkpoint, reduce_lr, TQDMNotebookCallback(leave_inner=True),
+                        callbacks=[TQDMNotebookCallback(leave_inner=True),
                                   CSVLogger(log_out_file, separator=',', append=False)],
-                        validation_steps=len(val_gen)*3,
+                        validation_steps=len(val_gen),
                         workers=5,
                         use_multiprocessing=False,
                         verbose=0)
 
     set_trainable(model)
 
+    use_cosine_lr = hasattr(params, 'cosine_annealing_params')
+    if use_cosine_lr:
+        from my_callbacks import CosineAnnealing
+        callbacks = [CosineAnnealing(len(train_gen), model_out_file, **params.cosine_annealing_params)]
+
     history = model.fit_generator(train_gen,
                         validation_data=val_gen, 
                         epochs=params.epochs,
-                        initial_epoch = params.epochs_warmup,
-                        callbacks=[early_stopping, model_checkpoint, reduce_lr, TQDMNotebookCallback(leave_inner=True),
-                                  CSVLogger(log_out_file, separator=',', append=True)],
-                        validation_steps=len(val_gen)*3,
+                        initial_epoch = 0, #params.epochs_warmup,
+                        callbacks= callbacks + [TQDMNotebookCallback(leave_inner=True),
+                                  CSVLogger(log_out_file, separator=',', append=False)],
+                        validation_steps=len(val_gen),
                         workers=5,
                         use_multiprocessing=False,
                         verbose=0
