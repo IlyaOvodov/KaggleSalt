@@ -129,7 +129,7 @@ class CosineAnnealing(Callback):
         self.lr = self.max_lr
         self.verbose = verbose
         self.period_no = 0
-		self.epoch = 0
+        self.epoch = 0
 
     def on_train_begin(self, logs=None):
         self.batches_passed_since_restart = 0
@@ -137,7 +137,7 @@ class CosineAnnealing(Callback):
         self.period_no = 0
 
     def on_epoch_begin(self, epoch, logs=None):
-		self.epoch = epoch
+        self.epoch = epoch
 
     def on_batch_begin(self, batch, logs=None):
         if not hasattr(self.model.optimizer, 'lr'):
