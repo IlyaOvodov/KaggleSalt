@@ -11,6 +11,8 @@ from keras.utils.data_utils import OrderedEnqueuer
 from keras.utils.generic_utils import to_list
 
 class EvalLrTest(Callback):
+    '''
+    '''
     def __init__(self, filename, val_data, lr_min = 1e-6, lr_max=1, steps=1500, val_period = 1, separator=','):
         self.filename = filename
         self.sep = separator
@@ -127,11 +129,15 @@ class CosineAnnealing(Callback):
         self.lr = self.max_lr
         self.verbose = verbose
         self.period_no = 0
+		self.epoch = 0
 
     def on_train_begin(self, logs=None):
         self.batches_passed_since_restart = 0
         self.lr = self.max_lr
         self.period_no = 0
+
+    def on_epoch_begin(self, epoch, logs=None):
+		self.epoch = epoch
 
     def on_batch_begin(self, batch, logs=None):
         if not hasattr(self.model.optimizer, 'lr'):
@@ -139,10 +145,8 @@ class CosineAnnealing(Callback):
         self.lr = self.min_lr + (self.max_lr-self.min_lr)*0.5*(1 +
                   math.cos(self.batches_passed_since_restart / self.batches_period * math.pi))
         K.set_value(self.model.optimizer.lr, self.lr)
-
-    def on_epoch_begin(self, epoch, logs=None):
-        if self.verbose > 0:
-            print('\nEpoch %05d: CosineAnnealing setting learning rate to %s.' % (epoch, self.lr))
+        if (self.verbose > 0) and (batch == 0):
+            print('\nEpoch %05d: CosineAnnealing setting learning rate to %s.' % (self.epoch, self.lr))
 
     def on_batch_end(self, batch, logs=None):
         self.batches_passed_since_restart += 1
