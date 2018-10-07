@@ -24,7 +24,7 @@ def common_aug(mode, params, mean, p=1.):
     if mode != 'inference':
         augs_list += [albumentations.HorizontalFlip(), ]
         if mode == 'more':
-            augs_list += [albumentations.RandomScale(0.04), ]
+            augs_list += [albumentations.RandomScale(0.1), ]
     if mode != 'inference':
         augs_list += [albumentations.RandomCrop(params.nn_image_size, params.nn_image_size),]
     else:

@@ -1,7 +1,29 @@
 
 # coding: utf-8
+def LoadModelParams(model_name):
+    import ast
+    with open(model_name + '.param.txt') as f:
+        s = f.readlines()
+        assert s[-2] == '}\n'
+        s = ''.join(s[:-1])
+        print(s)
+        params = ast.literal_eval(s)
+    params = type("params", (object,), params)
+    return params
 
-def RunTest(params):
+def  RunTestOnSizes(params,
+            model_name_template = 'models_3/{model}_{backbone}_{optimizer}_{augmented_image_size}-{padded_image_size}-{nn_image_size}_lrf{lrf}_{metric}_{CC}_f{test_fold_no}_{phash}',
+            sizes = [(101,192,128), ] # (202,336,224),
+            ):
+    for sz in sizes:
+        params.augmented_image_size = sz[0]
+        params.padded_image_size = sz[1]
+        params.nn_image_size = sz[2]
+        RunTest(params, model_name_template=model_name_template)
+
+def RunTest(params,
+            model_name_template = 'models_3/{model}_{backbone}_{optimizer}_{augmented_image_size}-{padded_image_size}-{nn_image_size}_lrf{lrf}_{metric}_{CC}_f{test_fold_no}_{phash}'
+            ):
 
     # # Params
 
@@ -212,6 +234,8 @@ def RunTest(params):
 
 
     # In[ ]:
+    if not hasattr(params, 'model_params'):
+        params.model_params = {}
 
     if params.load_model_from:
         model = load_model(params.load_model_from,
@@ -223,25 +247,47 @@ def RunTest(params):
         if params.model == 'FNN':
             model = segmentation_models.FPN(backbone_name=params.backbone, input_shape=(None, None, params.channels),
                                             encoder_weights=params.initial_weightns, freeze_encoder=True,
-                                            dropout = params.dropout, use_batchnorm=False, interpolation = params.interpolation)
+                                            dropout = params.dropout,
+                                            **params.model_params)
         if params.model == 'FNNdrop':
             model = segmentation_models.FPNdrop(backbone_name=params.backbone, input_shape=(None, None, params.channels),
                                             encoder_weights=params.initial_weightns, freeze_encoder=True,
-                                            dropout = params.dropout, use_batchnorm=False, interpolation = params.interpolation)
+                                            dropout = params.dropout,
+                                            **params.model_params)
         if params.model == 'Unet':
             model = segmentation_models.Unet(backbone_name=params.backbone, input_shape=(None, None, params.channels),
-                                             encoder_weights=params.initial_weightns, freeze_encoder=True)
+                                             encoder_weights=params.initial_weightns, freeze_encoder=True,
+                                            **params.model_params)
         if params.model == 'Linknet':
             model = segmentation_models.Linknet(backbone_name=params.backbone, input_shape=(None, None, params.channels),
-                                                encoder_weights=params.initial_weightns, freeze_encoder=True)
+                                                encoder_weights=params.initial_weightns, freeze_encoder=True,
+                                            **params.model_params)
         if params.model == 'divrikwicky':
-            model = keras_unet_divrikwicky_model.CreateModel(params.nn_image_size)
+            model = keras_unet_divrikwicky_model.CreateModel(params.nn_image_size,
+                                            **params.model_params)
             params.backbone = ''
         assert model
 
-    # In[ ]:
+    for l in model.layers:
+        if isinstance(l, segmentation_models.fpn.layers.UpSampling2D) or isinstance(l, keras.layers.UpSampling2D):
+            print(l)
+            if hasattr(l, 'interpolation'):
+                print(l.interpolation)
+                if hasattr(params, 'model_params') and 'interpolation' in params.model_params:
+                    l.interpolation = params.model_params['interpolation']
+            else:
+                print('qq')
 
-    model_out_file = 'models_3/{model}_{backbone}_{optimizer}_{augmented_image_size}-{padded_image_size}-{nn_image_size}_lrf{lrf}_{metric}_{CC}_f{test_fold_no}_{phash}'.format(
+    if hasattr(params, 'kernel_constraint_norm') and params.kernel_constraint_norm:
+        for l in model.layers:
+            if hasattr(l, 'kernel_constraint'):
+                print('kernel_constraint for ', l, ' is set to ',  params.kernel_constraint_norm)
+                l.kernel_constraint = keras.constraints.get(keras.constraints.max_norm(params.kernel_constraint_norm))
+
+    # In[ ]:
+    #print(model.summary())
+
+    model_out_file = model_name_template.format(
         lrf = params.ReduceLROnPlateau['factor'],
 		metric = params.monitor_metric[0],
         CC = 'CC' if params.coord_conv else '',

@@ -160,8 +160,6 @@ FNNdrop
 FNNdrop_resnet34_sgd_101-192-128_lrf0.5_val_my_iou_metric__f1_dbee5c 0.802(.14) 17s и продолжает расти 0.8024(128)
 FNNdrop + bilinear:
 FNNdrop_resnet34_sgd_101-192-128_lrf0.5_val_my_iou_metric__f1_44e18f 0.8008(.13) 18s 0.8008(128)
-увеличение LR: как FNN_resnet34_sgd_101-192-128_lrf0.5_val_my_iou_metric__f1_c2814d но 'max_lr': 0.05
-FNN_resnet34_sgd_101-192-128_lrf0.5_val_my_iou_metric__f1_77e563 - разнос, не сходится
 
 --------------- изменил код
 выше был bilinear только по половине upsamples
@@ -177,5 +175,4 @@ more aug:
 FNNdrop_resnet34_sgd_101-192-128_lrf0.5_val_my_iou_metric__f1_335c13 0.776 (.12 .17) 17s 0.7866 (.)0.7861(.17)
 
 Ввел kernel_constraints
-Тест на базе FNN_resnet34_sgd_101-192-128_lrf0.5_val_my_iou_metric__f1_c2814d: FNN с drop как в оригинале (только последний слой), nearest, но с kernel_constraint_norm = 3 и maxLR = 0.05
-
+period 10
