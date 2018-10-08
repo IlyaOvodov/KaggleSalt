@@ -192,9 +192,9 @@ def RunTest(params,
         assert len(imgs.shape) == 4
         assert imgs.shape[3] == 3
         n = imgs.shape[2]
-        hor_img = np.linspace(mean_val-mean_std, mean_val+mean_std, n).reshape((1, 1,n,1)) 
+        hor_img = np.linspace(-1., 1., n).reshape((1, 1,n,1))
         n = imgs.shape[1]
-        ver_img = np.linspace(mean_val-mean_std, mean_val+mean_std, n).reshape((1, n,1,1)) 
+        ver_img = np.linspace(-1., 1., n).reshape((1, n,1,1))
         imgs[:, :, :, 0:1] = hor_img
         imgs[:, :, :, 2:3] = ver_img
     def FillCoordConvList(imgs):
@@ -203,9 +203,9 @@ def RunTest(params,
         assert imgs[0].shape[2] == 3
         for img in imgs:
             n = img.shape[1]
-            hor_img = np.linspace(mean_val-mean_std, mean_val+mean_std, n).reshape((1,n,1)) 
+            hor_img = np.linspace(-1., 1., n).reshape((1,n,1))
             n = img.shape[0]
-            ver_img = np.linspace(mean_val-mean_std, mean_val+mean_std, n).reshape((n,1,1)) 
+            ver_img = np.linspace(-1., 1., n).reshape((n,1,1))
             img[:, :, 0:1] = hor_img
             img[:, :, 2:3] = ver_img
     
@@ -213,8 +213,8 @@ def RunTest(params,
         FillCoordConvList(train_images)
         FillCoordConvList(validate_images)
         print (train_images[0][0,0,0], train_images[0][0,0,2])
-        assert train_images[0][0,0,0] == mean_val-mean_std
-        assert train_images[0][0,0,2] == mean_val-mean_std
+        assert train_images[0][0,0,0] == -1.
+        assert train_images[0][0,0,2] == -1.
     
     ######################################
     
@@ -291,8 +291,7 @@ def RunTest(params,
         lrf = params.ReduceLROnPlateau['factor'],
 		metric = params.monitor_metric[0],
         CC = 'CC' if params.coord_conv else '',
-        phash = params_hash(),
-        **vars(params))
+        **vars(params)) + '_f{test_fold_no}_{phash}'.format(test_fold_no = params.test_fold_no, phash = params_hash())
     now = datetime.datetime.now()
     print('model:   ' + model_out_file + '    started at ' + now.strftime("%Y.%m.%d %H:%M:%S"))
 
@@ -323,11 +322,15 @@ def RunTest(params,
 
     # In[ ]:
 
+    if params.coord_conv:
+        mean = (np.asarray((0.,mean_val,0.)), np.asarray((1.,mean_std,1.)))
+    else:
+        mean = (mean_val, mean_std)
 
     train_gen = AlbuDataGenerator(train_images, train_masks, batch_size=params.batch_size, nn_image_size = params.nn_image_size,
-                                  mode = params.train_augmentation_mode, shuffle=True, params = params, mean=(mean_val, mean_std))
+                                  mode = params.train_augmentation_mode, shuffle=True, params = params, mean=mean)
     val_gen = AlbuDataGenerator(validate_images, validate_masks, batch_size=params.test_batch_size,nn_image_size = params.nn_image_size,
-                                mode = params.test_augmentation_mode, shuffle=False, params = params, mean=(mean_val, mean_std))
+                                mode = params.test_augmentation_mode, shuffle=False, params = params, mean=mean)
 
 
     # In[ ]:

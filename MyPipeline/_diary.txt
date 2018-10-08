@@ -151,28 +151,11 @@ FNN_resnet34_sgd_202-336-224_lrf0.5_val_my_iou_metric__f1_60a410 300 0.8256(.10)
 Сильное переобучение по loss начинается уже после 40 итерации. Но iou продолжает улучшаться до 250--300
 FNN_resnet34_sgd_101-192-128_lrf0.5_val_my_iou_metric__f1_cab178 300  0.8034(.11) test 0.8050 (.11 128) 15s
 Сильное переобучение по loss начинается уже после 40 итерации, после 80 loss увеличивается. Но iou продолжает улучшаться до 150--300
+
+DROPOUT
 FNN с drop как в оригинале (только последний слой)
 FNN_resnet34_sgd_101-192-128_lrf0.5_val_my_iou_metric__f1_c2814d 0.8092(.14) 0.80919(128)
-+ bilinear:
-FNN_resnet34_sgd_101-192-128_lrf0.5_val_my_iou_metric__f1_13ac7c 0.815(.14) 16s 0.821(128) 
+не выглядит случайным выбросом. Возможно, улучшится при доучивании 0.8073(.12)
 
 FNNdrop
 FNNdrop_resnet34_sgd_101-192-128_lrf0.5_val_my_iou_metric__f1_dbee5c 0.802(.14) 17s и продолжает расти 0.8024(128)
-FNNdrop + bilinear:
-FNNdrop_resnet34_sgd_101-192-128_lrf0.5_val_my_iou_metric__f1_44e18f 0.8008(.13) 18s 0.8008(128)
-
---------------- изменил код
-выше был bilinear только по половине upsamples
-ниже добавлено в оставшизхся 
-FNN_resnet34_sgd_101-192-128_lrf0.5_val_my_iou_metric__f1_2c3cc7 0.8117(.18) 16.4s   0.813
-FNN_resnet34_sgd_202-336-224_lrf0.5_val_my_iou_metric__f1_6c7b6b 0.8241(.16) 35s     0.8241
-
-FNNdrop
-FNNdrop_resnet34_sgd_101-192-128_lrf0.5_val_my_iou_metric__f1_42eb01 0.8193(.18, .19) 17s 0.822
-                                                                     0.8146(.14) 0.8069(.13) 0.8201 0.8129
-FNNdrop
-more aug:
-FNNdrop_resnet34_sgd_101-192-128_lrf0.5_val_my_iou_metric__f1_335c13 0.776 (.12 .17) 17s 0.7866 (.)0.7861(.17)
-
-Ввел kernel_constraints
-period 10

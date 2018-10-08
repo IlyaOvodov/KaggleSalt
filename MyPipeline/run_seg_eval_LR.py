@@ -1,7 +1,9 @@
 from my_callbacks import EvalLrTest
 # coding: utf-8
 
-def RunTest(params):
+def RunTest(params,
+            model_name_template = 'models_3/{model}_{backbone}_{optimizer}_{augmented_image_size}-{padded_image_size}-{nn_image_size}_lrf{lrf}_{metric}_{CC}_f{test_fold_no}_{phash}'
+            ):
 
     # # Params
 
@@ -170,9 +172,9 @@ def RunTest(params):
         assert len(imgs.shape) == 4
         assert imgs.shape[3] == 3
         n = imgs.shape[2]
-        hor_img = np.linspace(mean_val-mean_std, mean_val+mean_std, n).reshape((1, 1,n,1)) 
+        hor_img = np.linspace(-1., 1., n).reshape((1, 1,n,1))
         n = imgs.shape[1]
-        ver_img = np.linspace(mean_val-mean_std, mean_val+mean_std, n).reshape((1, n,1,1)) 
+        ver_img = np.linspace(-1., 1., n).reshape((1, n,1,1))
         imgs[:, :, :, 0:1] = hor_img
         imgs[:, :, :, 2:3] = ver_img
     def FillCoordConvList(imgs):
@@ -181,9 +183,9 @@ def RunTest(params):
         assert imgs[0].shape[2] == 3
         for img in imgs:
             n = img.shape[1]
-            hor_img = np.linspace(mean_val-mean_std, mean_val+mean_std, n).reshape((1,n,1)) 
+            hor_img = np.linspace(-1., 1., n).reshape((1,n,1))
             n = img.shape[0]
-            ver_img = np.linspace(mean_val-mean_std, mean_val+mean_std, n).reshape((n,1,1)) 
+            ver_img = np.linspace(-1., 1., n).reshape((n,1,1))
             img[:, :, 0:1] = hor_img
             img[:, :, 2:3] = ver_img
     
@@ -191,8 +193,8 @@ def RunTest(params):
         FillCoordConvList(train_images)
         FillCoordConvList(validate_images)
         print (train_images[0][0,0,0], train_images[0][0,0,2])
-        assert train_images[0][0,0,0] == mean_val-mean_std
-        assert train_images[0][0,0,2] == mean_val-mean_std
+        assert train_images[0][0,0,0] == -1.
+        assert train_images[0][0,0,2] == 1.
     
     ######################################
     
@@ -212,6 +214,8 @@ def RunTest(params):
 
 
     # In[ ]:
+    if not hasattr(params, 'model_params'):
+        params.model_params = {}
 
     if params.load_model_from:
         model = load_model(params.load_model_from,
@@ -222,30 +226,55 @@ def RunTest(params):
         model = None
         if params.model == 'FNN':
             model = segmentation_models.FPN(backbone_name=params.backbone, input_shape=(None, None, params.channels),
-                                            encoder_weights=params.initial_weightns, freeze_encoder=True)
+                                            encoder_weights=params.initial_weightns, freeze_encoder=True,
+                                            dropout = params.dropout,
+                                            **params.model_params)
+        if params.model == 'FNNdrop':
+            model = segmentation_models.FPNdrop(backbone_name=params.backbone, input_shape=(None, None, params.channels),
+                                            encoder_weights=params.initial_weightns, freeze_encoder=True,
+                                            dropout = params.dropout,
+                                            **params.model_params)
         if params.model == 'Unet':
             model = segmentation_models.Unet(backbone_name=params.backbone, input_shape=(None, None, params.channels),
-                                             encoder_weights=params.initial_weightns, freeze_encoder=True)
+                                             encoder_weights=params.initial_weightns, freeze_encoder=True,
+                                            **params.model_params)
         if params.model == 'Linknet':
             model = segmentation_models.Linknet(backbone_name=params.backbone, input_shape=(None, None, params.channels),
-                                                encoder_weights=params.initial_weightns, freeze_encoder=True)
+                                                encoder_weights=params.initial_weightns, freeze_encoder=True,
+                                            **params.model_params)
         if params.model == 'divrikwicky':
-            model = keras_unet_divrikwicky_model.CreateModel(nn_image_size)
+            model = keras_unet_divrikwicky_model.CreateModel(params.nn_image_size,
+                                            **params.model_params)
             params.backbone = ''
+        assert model
 
+    for l in model.layers:
+        if isinstance(l, segmentation_models.fpn.layers.UpSampling2D) or isinstance(l, keras.layers.UpSampling2D):
+            print(l)
+            if hasattr(l, 'interpolation'):
+                print(l.interpolation)
+                if hasattr(params, 'model_params') and 'interpolation' in params.model_params:
+                    l.interpolation = params.model_params['interpolation']
+            else:
+                print('qq')
+
+    if hasattr(params, 'kernel_constraint_norm') and params.kernel_constraint_norm:
+        for l in model.layers:
+            if hasattr(l, 'kernel_constraint'):
+                print('kernel_constraint for ', l, ' is set to ',  params.kernel_constraint_norm)
+                l.kernel_constraint = keras.constraints.get(keras.constraints.max_norm(params.kernel_constraint_norm))
 
     # In[ ]:
 
-    model_out_file = 'models_3/{model}_{backbone}_{optimizer}_{augmented_image_size}-{padded_image_size}-{nn_image_size}_LReval_f{test_fold_no}_{phash}.model'.format(
+    model_out_file = model_name_template.format(
         lrf = params.ReduceLROnPlateau['factor'],
 		metric = params.monitor_metric[0],
         CC = 'CC' if params.coord_conv else '',
-        phash = params_hash(),
-        **vars(params))
+        **vars(params)) + '_f{test_fold_no}_{phash}'.format(test_fold_no = params.test_fold_no, phash = params_hash())
     now = datetime.datetime.now()
     print('model:   ' + model_out_file + '    started at ' + now.strftime("%Y.%m.%d %H:%M:%S"))
 
-    assert not os.path.exists(model_out_file)
+    assert not os.path.exists(model_out_file + '.model')
 
     params_save(model_out_file, verbose = True)
     log_out_file = model_out_file+'.log.csv'
@@ -261,17 +290,26 @@ def RunTest(params):
 
     # In[ ]:
 
+    optimizer=params.optimizer
+    if optimizer == 'adam':
+        optimizer = keras.optimizers.adam(**params.optimizer_params)
+    elif optimizer == 'sgd':
+        optimizer = keras.optimizers.sgd(**params.optimizer_params)
 
-    model.compile(loss="binary_crossentropy", optimizer="sgd", metrics=["acc", my_iou_metric]) #, my_iou_metric
+    model.compile(loss="binary_crossentropy", optimizer=optimizer, metrics=["acc", my_iou_metric]) #, my_iou_metric
 
 
     # In[ ]:
 
+    if params.coord_conv:
+        mean = ((0,mean_val,0), (1,mean_std,1))
+    else:
+        mean = (mean_val, mean_std)
 
     train_gen = AlbuDataGenerator(train_images, train_masks, batch_size=params.batch_size, nn_image_size = params.nn_image_size,
-                                  mode = params.train_augmentation_mode, shuffle=True, params = params, mean=(mean_val, mean_std))
+                                  mode = params.train_augmentation_mode, shuffle=True, params = params, mean=mean)
     val_gen = AlbuDataGenerator(validate_images, validate_masks, batch_size=params.test_batch_size,nn_image_size = params.nn_image_size,
-                                mode = params.test_augmentation_mode, shuffle=False, params = params, mean=(mean_val, mean_std))
+                                mode = params.test_augmentation_mode, shuffle=False, params = params, mean=mean)
 
 
     # In[ ]:
@@ -287,10 +325,10 @@ def RunTest(params):
 
     if params.epochs_warmup:
       history = model.fit_generator(train_gen,
-                        validation_data=val_gen, 
+                        validation_data=None, 
                         epochs=params.epochs_warmup,
                         callbacks=[TQDMNotebookCallback(leave_inner=True)],
-                        validation_steps=len(val_gen)*3,
+                        validation_steps=None,
                         workers=5,
                         use_multiprocessing=False,
                         verbose=0)

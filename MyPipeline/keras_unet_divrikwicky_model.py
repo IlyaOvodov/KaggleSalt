@@ -25,7 +25,7 @@ def residual_block(blockInput, num_filters=16):
     return x
 
 # Build model
-def build_model(input_layer, start_neurons, DropoutRatio = 0.5):
+def build_model(input_layer, start_neurons, DropoutRatio = 0.5, nn_image_size = 101):
     # 101 -> 50
     conv1 = Conv2D(start_neurons * 1, (3, 3), activation=None, padding="same")(input_layer)
     conv1 = residual_block(conv1,start_neurons * 1)
@@ -75,9 +75,12 @@ def build_model(input_layer, start_neurons, DropoutRatio = 0.5):
     uconv4 = Activation(ACTIVATION)(uconv4)
     
     # 12 -> 25
-    deconv3 = Conv2DTranspose(start_neurons * 4, (3, 3), strides=(2, 2), padding="same")(uconv4)
-    #deconv3 = Conv2DTranspose(start_neurons * 4, (3, 3), strides=(2, 2), padding="valid")(uconv4)
-    uconv3 = concatenate([deconv3, conv3])    
+    #deconv3 = Conv2DTranspose(start_neurons * 4, (3, 3), strides=(2, 2), padding="same")(uconv4)
+    if nn_image_size == 101:
+        deconv3 = Conv2DTranspose(start_neurons * 4, (3, 3), strides=(2, 2), padding="valid")(uconv4)
+    else:
+        deconv3 = Conv2DTranspose(start_neurons * 4, (3, 3), strides=(2, 2), padding="same")(uconv4)
+    uconv3 = concatenate([deconv3, conv3])
     uconv3 = Dropout(DropoutRatio)(uconv3)
     
     uconv3 = Conv2D(start_neurons * 4, (3, 3), activation=None, padding="same")(uconv3)
@@ -96,8 +99,10 @@ def build_model(input_layer, start_neurons, DropoutRatio = 0.5):
     uconv2 = Activation(ACTIVATION)(uconv2)
     
     # 50 -> 101
-    deconv1 = Conv2DTranspose(start_neurons * 1, (3, 3), strides=(2, 2), padding="same")(uconv2)
-    #deconv1 = Conv2DTranspose(start_neurons * 1, (3, 3), strides=(2, 2), padding="valid")(uconv2)
+    if nn_image_size == 101:
+        deconv1 = Conv2DTranspose(start_neurons * 1, (3, 3), strides=(2, 2), padding="valid")(uconv2)
+    else:
+        deconv1 = Conv2DTranspose(start_neurons * 1, (3, 3), strides=(2, 2), padding="same")(uconv2)
     uconv1 = concatenate([deconv1, conv1])
     
     uconv1 = Dropout(DropoutRatio)(uconv1)
@@ -114,6 +119,6 @@ def build_model(input_layer, start_neurons, DropoutRatio = 0.5):
 
 def CreateModel(img_size_target, channels= 3):
     input_layer = Input((img_size_target, img_size_target, channels))
-    output_layer = build_model(input_layer, 16,0.5)
+    output_layer = build_model(input_layer, 16,0.5, nn_image_size = img_size_target)
     model = Model(input_layer, output_layer)    
     return model
