@@ -86,12 +86,15 @@ class AlbuDataGenerator(keras.utils.Sequence):
         # Generate data
         for i, index in enumerate(indexes):
             image = self.images[index]
-            mask = None if self.masks is None else self.masks[index]
-            aug_res = self.augmentation(image=image, mask=mask)
+            if self.masks is None:
+                aug_res = self.augmentation(image=image)
+            else:
+                mask = self.masks[index]
+                aug_res = self.augmentation(image=image, mask=mask)
+                mask = aug_res['mask']
+                y[i, ...] = mask.reshape(mask.shape[0], mask.shape[1], 1)
             image = aug_res['image']
             X[i, ...] = image
-            mask = aug_res['mask']
-            y[i, ...] = mask.reshape(mask.shape[0], mask.shape[1], 1)
 
         return X, y
 

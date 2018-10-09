@@ -140,22 +140,3 @@ models_3/divrikwicky__adam_224-336-224_lrf0.5_val_my_iou_metric__f1_292ccb.model
 models_3/divrikwicky__adam_128-192-128_lrf0.5_val_my_iou_metric__f1_25454c.model Epoch 00216: val_my_iou_metric did not improve from 0.79653  22
 models_3/divrikwicky__adam_128-128-128_lrf0.5_val_my_iou_metric__f1_75b76f.model Epoch 00124: val_my_iou_metric did not improve from 0.78707  22
 
-косинусный отжиг 
-'optimizer': 'sgd', 'optimizer_params': {},
-'cosine_annealing_params' : {'min_lr' : 1.e-5, 'max_lr': 2.e-2, 'period' : 20, 'verbose' : 1},
-
-FNN_resnet34_sgd_101-192-128_lrf0.5_val_my_iou_metric__f1_f5b619 120ep 'val_my_iou_metric': 0.761 0.764(128)
-
-+ momentum & Nesterov
-FNN_resnet34_sgd_202-336-224_lrf0.5_val_my_iou_metric__f1_60a410 300 0.8256(.10) 0.8266(.14) test 0.8311(.10, 224), 0.8231(.10 320), 0.8258(.14 224) 33s
-Сильное переобучение по loss начинается уже после 40 итерации. Но iou продолжает улучшаться до 250--300
-FNN_resnet34_sgd_101-192-128_lrf0.5_val_my_iou_metric__f1_cab178 300  0.8034(.11) test 0.8050 (.11 128) 15s
-Сильное переобучение по loss начинается уже после 40 итерации, после 80 loss увеличивается. Но iou продолжает улучшаться до 150--300
-
-DROPOUT
-FNN с drop как в оригинале (только последний слой)
-FNN_resnet34_sgd_101-192-128_lrf0.5_val_my_iou_metric__f1_c2814d 0.8092(.14) 0.80919(128)
-не выглядит случайным выбросом. Возможно, улучшится при доучивании 0.8073(.12)
-
-FNNdrop
-FNNdrop_resnet34_sgd_101-192-128_lrf0.5_val_my_iou_metric__f1_dbee5c 0.802(.14) 17s и продолжает расти 0.8024(128)
