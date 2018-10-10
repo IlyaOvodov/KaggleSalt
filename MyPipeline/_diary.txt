@@ -140,3 +140,12 @@ models_3/divrikwicky__adam_224-336-224_lrf0.5_val_my_iou_metric__f1_292ccb.model
 models_3/divrikwicky__adam_128-192-128_lrf0.5_val_my_iou_metric__f1_25454c.model Epoch 00216: val_my_iou_metric did not improve from 0.79653  22
 models_3/divrikwicky__adam_128-128-128_lrf0.5_val_my_iou_metric__f1_75b76f.model Epoch 00124: val_my_iou_metric did not improve from 0.78707  22
 
+
+
+f3 continue 
+0.814 (.7) 0.8162 (.7/153)
+f3_continue lr002
+0.8137 (.3) 0.1861(.0/3)
+f3_continue p50
+0.8174 (.0) 0.8194(.0/41)
+
