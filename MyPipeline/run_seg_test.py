@@ -324,6 +324,8 @@ def RunTest(params,
     elif optimizer == 'sgd':
         optimizer = keras.optimizers.sgd(**params.optimizer_params)
 
+    if not hasattr(params, 'loss'):
+        params.loss = 'binary_crossentropy'
     loss = params.loss
     if loss == 'bce_lavazs_loss':
         loss = bce_lavazs_loss
