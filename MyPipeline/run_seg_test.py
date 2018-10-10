@@ -86,7 +86,8 @@ def RunTest(params,
     from keras import backend as K
 
     import tensorflow as tf
-
+    sys.path.append('../3rd_party/LovaszSoftmax/tensorflow')
+    import lovasz_losses_tf as L_loss
 
     # # Load data
 
@@ -220,6 +221,12 @@ def RunTest(params,
     
     from my_augs import AlbuDataGenerator
 
+    def lavazs_loss(labels, scores):  # Keras and TF has reversed order of args
+        return L_loss.lovasz_hinge(2 * scores - 1, labels, ignore=255, per_image=True)
+
+    def bce_lavazs_loss(labels, scores):  # Keras and TF has reversed order of args
+        alpha = 0.1
+        return alpha*keras.losses.binary_crossentropy(labels, scores) + (1-alpha)*lavazs_loss(labels, scores)
 
 
     # # model
@@ -317,7 +324,11 @@ def RunTest(params,
     elif optimizer == 'sgd':
         optimizer = keras.optimizers.sgd(**params.optimizer_params)
 
-    model.compile(loss="binary_crossentropy", optimizer=optimizer, metrics=["acc", my_iou_metric]) #, my_iou_metric
+    loss = params.loss
+    if loss == 'bce_lavazs_loss':
+        loss = bce_lavazs_loss
+
+    model.compile(loss=loss, optimizer=optimizer, metrics=["acc", my_iou_metric]) #, my_iou_metric
 
 
     # In[ ]:
