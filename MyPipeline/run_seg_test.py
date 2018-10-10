@@ -128,7 +128,7 @@ def RunTest(params,
 
     import os
     os.environ['PYTHONHASHSEED'] = '0'
-
+    params.seed += params.test_fold_no
     np.random.seed(params.seed)
     rn.seed(params.seed)
 
