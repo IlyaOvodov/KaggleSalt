@@ -23,6 +23,15 @@ from keras.callbacks import EarlyStopping, ModelCheckpoint, ReduceLROnPlateau, C
 from keras import backend as K
 
 import tensorflow as tf
+
+from tensorflow.python.ops import array_ops
+from tensorflow.python.ops import candidate_sampling_ops
+from tensorflow.python.ops import embedding_ops
+from tensorflow.python.ops import gen_array_ops  # pylint: disable=unused-import
+from tensorflow.python.ops import gen_nn_ops
+from tensorflow.python.ops import math_ops
+from tensorflow.python.ops import nn_ops
+
 from distutils.version import StrictVersion
 
 sys.path.append('../3rd_party/LovaszSoftmax/tensorflow')
@@ -32,7 +41,7 @@ import load_data
 load_data = reload(load_data)
 import keras_unet_divrikwicky_model
 keras_unet_divrikwicky_model = reload(keras_unet_divrikwicky_model)
-from my_augs import AlbuDataGenerator
+from my_augs import AlbuDataGenerator, AlbuDataGeneratorWithPseudoLabelling
 
 sys.path.append('../3rd_party/segmentation_models')
 import segmentation_models
@@ -106,6 +115,25 @@ def bce_lavazs_loss(labels, scores):  # Keras and TF has reversed order of args
     alpha = 0.1
     return alpha*keras.losses.binary_crossentropy(labels, scores) + (1-alpha)*lavazs_loss(labels, scores)
 
+def PseudoLabelingLoss(loss, pseudo_label_weight = 0.2, confidence_thr = 0.2):
+    def func(labels, scores):
+        semi_batch_sz = tf.shape(labels)[0]//2
+
+        loss_val = loss(labels[:semi_batch_sz, ...], scores[:semi_batch_sz, ...])
+        loss_zeros = array_ops.zeros_like(loss_val, dtype=loss_val.dtype)
+        loss_val = tf.concat([loss_val, loss_zeros], 0)
+        zeros = array_ops.zeros_like(labels, dtype=labels.dtype)
+        ones = array_ops.ones_like(labels, dtype=labels.dtype)
+        cond = (scores > 1-confidence_thr)
+        pseudo_labels = array_ops.where(cond, ones, zeros)
+        cond = ((scores > 1-confidence_thr) | (scores < confidence_thr) )
+        zeros_score = array_ops.zeros_like(scores, dtype=scores.dtype)
+        pseudo_scores = array_ops.where(cond, scores, zeros_score)
+        loss_val = (1-pseudo_label_weight) * loss_val + pseudo_label_weight*keras.losses.binary_crossentropy(pseudo_labels, pseudo_scores)
+        return loss_val
+    return func
+
+
 if StrictVersion(keras.__version__) < StrictVersion('2.2.3'):
     print('Old Keras {}'.format(StrictVersion(keras.__version__)))
     UpSampling2DLayerClass = segmentation_models.fpn.layers.UpSampling2D
@@ -149,7 +177,7 @@ def CreateModel(model_fn):
     assert model
     return model
 
-def CompileModel(model, params):
+def CompileModel(model, params, use_pseudo_labeling):
     for l in model.layers:
         if isinstance(l, UpSampling2DLayerClass):
             if hasattr(l, 'interpolation'):
@@ -173,6 +201,10 @@ def CompileModel(model, params):
     loss = params.loss
     if loss == 'bce_lavazs_loss':
         loss = bce_lavazs_loss
+    elif loss =='binary_crossentropy':
+        loss = keras.losses.binary_crossentropy
+    if use_pseudo_labeling:
+        loss = PseudoLabelingLoss(loss)
     model.compile(loss=loss, optimizer=optimizer, metrics=["acc", my_iou_metric]) #, my_iou_metric
 
 
@@ -206,6 +238,13 @@ def RunTest(params,
     train_df = load_data.LoadData(train_data = True, DEV_MODE_RANGE = DEV_MODE_RANGE, to_gray = False)
     train_images, train_masks, validate_images, validate_masks = load_data.SplitTrainData(train_df, params.test_fold_no)
     train_images.shape, train_masks.shape, validate_images.shape, validate_masks.shape
+
+    use_pseudo_labeling = hasattr(params,'use_pseudo_labeling') and params.use_pseudo_labeling
+
+
+    if use_pseudo_labeling:
+        test_df = load_data.LoadData(train_data=False, DEV_MODE_RANGE=DEV_MODE_RANGE)
+        test_images = test_df.images
 
     # # Reproducability setup:
     import random as rn
@@ -266,7 +305,7 @@ def RunTest(params,
         model = LoadModel(params.load_model_from)
     else:
         model = CreateModel(params)
-    CompileModel(model, params)
+    CompileModel(model, params, use_pseudo_labeling)
 
     # In[ ]:
     #print(model.summary())
@@ -291,7 +330,12 @@ def RunTest(params,
     else:
         mean = (mean_val, mean_std)
 
-    train_gen = AlbuDataGenerator(train_images, train_masks, batch_size=params.batch_size, nn_image_size = params.nn_image_size,
+    if use_pseudo_labeling:
+        train_gen = AlbuDataGeneratorWithPseudoLabelling(train_images, train_masks, test_images, batch_size=params.batch_size,
+                                      nn_image_size=params.nn_image_size,
+                                      mode=params.train_augmentation_mode, shuffle=True, params=params, mean=mean)
+    else:
+        train_gen = AlbuDataGenerator(train_images, train_masks, batch_size=params.batch_size, nn_image_size = params.nn_image_size,
                                   mode = params.train_augmentation_mode, shuffle=True, params = params, mean=mean)
     val_gen = AlbuDataGenerator(validate_images, validate_masks, batch_size=params.test_batch_size,nn_image_size = params.nn_image_size,
                                 mode = params.test_augmentation_mode, shuffle=False, params = params, mean=mean)

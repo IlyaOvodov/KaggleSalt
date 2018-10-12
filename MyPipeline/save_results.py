@@ -38,10 +38,13 @@ from keras_tqdm import TQDMCallback, TQDMNotebookCallback
 mean_val = 0.481577
 mean_std = 0.11108
 
-def ResultsFileName(save_results_dir, params_file, model_no):
-    return save_results_dir + params_file + '.' + str(model_no) + '.results'
+def ResultsFileName(save_results_dir, params_file, model_no, flip):
+    fn = save_results_dir + params_file + '.' + str(model_no) + '.results'
+    if flip:
+        fn += '.flip'
+    return  fn
 
-def PredictResults(test_images, data_dir, params_file, model_no, save_results_dir = None, eval_crop_size = 224):
+def PredictResults(test_images, data_dir, params_file, model_no, flip, save_results_dir = None, eval_crop_size = 224):
     assert isinstance(model_no, int)
     params = LoadModelParams(data_dir+params_file)
     params.load_model_from = data_dir+params_file + '.' + str(model_no) + '.model'
@@ -56,15 +59,20 @@ def PredictResults(test_images, data_dir, params_file, model_no, save_results_di
     else:
         model = model1
     assert model
-    CompileModel(model, params)
+    CompileModel(model, params, use_pseudo_labeling=False)
     # # Train evaluation
     params.nn_image_size = eval_crop_size #params.padded_image_size
 
+    augmentation_mode = 'inference+flip' if flip else 'inference'
     test_gen = AlbuDataGenerator(test_images, None, batch_size=params.test_batch_size, nn_image_size = params.nn_image_size,
-                                mode = 'inference', shuffle=False, params = params, mean=(mean_val, mean_std),
+                                mode = augmentation_mode, shuffle=False, params = params, mean=(mean_val, mean_std),
                                use_ceil = True)
     r = model.predict_generator(test_gen, max_queue_size=10, workers=1, use_multiprocessing=False)
-    r = r[:test_images.shape[0], ...] # if ceil, r dim is higher
+    r = r[:test_images.shape[0], ...] # if ceil, r dim can be higher in because of last batch
+    if flip:
+        for i in range(r.shape[0]):
+            fl = cv2.flip(r[i, ...], 1)
+            r[i, ...] = fl[..., np.newaxis]
     start_coord = (params.nn_image_size - params.augmented_image_size)//2
     r_orig = r[:, start_coord : start_coord + params.augmented_image_size, start_coord : start_coord + params.augmented_image_size]
     test_results = []
@@ -74,5 +82,5 @@ def PredictResults(test_images, data_dir, params_file, model_no, save_results_di
         if np.sum(im) == 0:
             test_results[i][...] = 0
     if save_results_dir is not None:
-        np.save(ResultsFileName(save_results_dir, params_file, model_no), test_results)
+        np.save(ResultsFileName(save_results_dir, params_file, model_no, flip), test_results)
     return test_results
