@@ -46,22 +46,24 @@ def ResultsFileName(save_results_dir, params_file, model_no, flip, is_test_run):
         fn += '.flip'
     return  fn
 
-def PredictResults(test_images, data_dir, params_file, model_no, flip, is_test_run, save_results_dir = None, eval_crop_size = 224):
+def PredictResults(model, test_images, data_dir, params_file, model_no, flip, is_test_run, save_results_dir = None, eval_crop_size = 224):
     assert isinstance(model_no, int)
     params = LoadModelParams(data_dir+params_file)
     params.load_model_from = data_dir+params_file + '.' + str(model_no) + '.model'
 
     # # model
-    model1 = LoadModel(params.load_model_from)
-    model = None
-    if 'interpolation' in params.model_params and params.model_params['interpolation']=='bilinear':
-        print('Rebuilding model to fix BILINEAR problem')
-        model = CreateModel(params)
-        model.set_weights(model1.get_weights())
-    else:
-        model = model1
-    assert model
-    CompileModel(model, params, use_pseudo_labeling=False)
+    if model is None:
+        model1 = LoadModel(params.load_model_from)
+        model = None
+        if 'interpolation' in params.model_params and params.model_params['interpolation']=='bilinear':
+            print('Rebuilding model to fix BILINEAR problem')
+            model = CreateModel(params)
+            model.set_weights(model1.get_weights())
+        else:
+            model = model1
+        assert model
+        CompileModel(model, params, use_pseudo_labeling=False)
+
     # # Train evaluation
     params.nn_image_size = eval_crop_size #params.padded_image_size
 
@@ -85,4 +87,4 @@ def PredictResults(test_images, data_dir, params_file, model_no, flip, is_test_r
             test_results[i][...] = 0
     if save_results_dir is not None:
         np.save(ResultsFileName(save_results_dir, params_file, model_no, flip, is_test_run), test_results)
-    return test_results
+    return test_results, model
