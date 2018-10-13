@@ -22,9 +22,12 @@ def common_aug(mode, params, mean, p=1.):
                                                  min_width=params.padded_image_size,
                                                  border_mode=cv2.BORDER_REFLECT_101),]
     if mode != 'inference':
-        augs_list += [albumentations.HorizontalFlip(), ]
-        if mode == 'more':
-            augs_list += [albumentations.RandomScale(0.1), ]
+        if mode == 'inference+flip':
+            augs_list += [albumentations.HorizontalFlip(p=1.), ]
+        else:
+            augs_list += [albumentations.HorizontalFlip(), ]
+    if mode == 'more':
+        augs_list += [albumentations.RandomScale(0.1), ]
     if mode in ['inference', 'inference+flip']:
         augs_list += [albumentations.CenterCrop(params.nn_image_size, params.nn_image_size),]
     else:

@@ -141,7 +141,8 @@ else:
     UpSampling2DLayerClass = keras.layers.UpSampling2D
 custom_objects = {'my_iou_metric': my_iou_metric,
                   'UpSampling2D': UpSampling2DLayerClass,
-                  'bce_lavazs_loss': bce_lavazs_loss
+                  'bce_lavazs_loss': bce_lavazs_loss,
+                  'func' : bce_lavazs_loss # GVNC, otherwize model load doesn't work
                   }
 print('UpSampling2DLayerClass', UpSampling2DLayerClass)
 

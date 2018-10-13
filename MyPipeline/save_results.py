@@ -38,13 +38,15 @@ from keras_tqdm import TQDMCallback, TQDMNotebookCallback
 mean_val = 0.481577
 mean_std = 0.11108
 
-def ResultsFileName(save_results_dir, params_file, model_no, flip):
+def ResultsFileName(save_results_dir, params_file, model_no, flip, is_test_run):
     fn = save_results_dir + params_file + '.' + str(model_no) + '.results'
+    if not is_test_run:
+        fn += '.val'
     if flip:
         fn += '.flip'
     return  fn
 
-def PredictResults(test_images, data_dir, params_file, model_no, flip, save_results_dir = None, eval_crop_size = 224):
+def PredictResults(test_images, data_dir, params_file, model_no, flip, is_test_run, save_results_dir = None, eval_crop_size = 224):
     assert isinstance(model_no, int)
     params = LoadModelParams(data_dir+params_file)
     params.load_model_from = data_dir+params_file + '.' + str(model_no) + '.model'
@@ -82,5 +84,5 @@ def PredictResults(test_images, data_dir, params_file, model_no, flip, save_resu
         if np.sum(im) == 0:
             test_results[i][...] = 0
     if save_results_dir is not None:
-        np.save(ResultsFileName(save_results_dir, params_file, model_no, flip), test_results)
+        np.save(ResultsFileName(save_results_dir, params_file, model_no, flip, is_test_run), test_results)
     return test_results
