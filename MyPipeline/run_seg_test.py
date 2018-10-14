@@ -151,7 +151,7 @@ def LoadModel(model_fn):
     print('MODEL LOADED from: ' + model_fn)
     return model
 
-def CreateModel(model_fn):
+def CreateModel(params):
     model = None
     if params.model == 'FNN':
         model = segmentation_models.FPN(backbone_name=params.backbone, input_shape=(None, None, params.channels),
@@ -302,10 +302,21 @@ def RunTest(params,
     if not hasattr(params, 'model_params'):
         params.model_params = {}
 
+    create_and_load_weights = hasattr(params, 'create_and_load_weights') and params.create_and_load_weights
+    stop_load_weights_on = hasattr(params, 'stop_load_weights_on') and params.stop_load_weights_on
+    freeze_loaded_weights = hasattr(params, 'freeze_loaded_weights') and params.freeze_loaded_weights
+    model = None
     if params.load_model_from:
         model = LoadModel(params.load_model_from)
-    else:
+    if (model is None) or create_and_load_weights:
+        model0 = model
         model = CreateModel(params)
+        if create_and_load_weights:
+            for i, la in enumerate(model.layers):
+                if stop_load_weights_on and la.name == stop_load_weights_on:
+                    break
+                la.set_weights(model0.layers[i].get_weights())
+                la.trainable = not freeze_loaded_weights
     CompileModel(model, params, use_pseudo_labeling)
 
     # In[ ]:
@@ -380,8 +391,8 @@ def RunTest(params,
                         workers=5,
                         use_multiprocessing=False,
                         verbose=0)
-
-    set_trainable(model)
+    if not freeze_loaded_weights:
+        set_trainable(model)
 
     use_cosine_lr = hasattr(params, 'cosine_annealing_params')
     if use_cosine_lr:

@@ -13,8 +13,6 @@ import numpy as np
 import cv2
 from tqdm import tqdm_notebook
 
-import torch
-
 def load_image(path, mask = False, to_gray=False):
     """
     Load image from a given path and pad it on the sides, so that eash side is divisible by 32 (newtwork requirement)
