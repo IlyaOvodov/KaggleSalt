@@ -192,6 +192,10 @@ def CompileModel(model, params, use_pseudo_labeling):
             if hasattr(l, 'kernel_constraint'):
                 print('kernel_constraint for ', l, ' is set to ',  params.kernel_constraint_norm)
                 l.kernel_constraint = keras.constraints.get(keras.constraints.max_norm(params.kernel_constraint_norm))
+    else
+        for l in model.layers:
+            if hasattr(l, 'kernel_constraint'):
+                l.kernel_constraint = None
     optimizer=params.optimizer
     if optimizer == 'adam':
         optimizer = keras.optimizers.adam(**params.optimizer_params)
@@ -312,6 +316,8 @@ def RunTest(params,
         model0 = model
         model = CreateModel(params)
         if create_and_load_weights:
+            print(model.summary())
+            print(model0.summary())
             for i, la in enumerate(model.layers):
                 if stop_load_weights_on and la.name == stop_load_weights_on:
                     break
@@ -393,11 +399,12 @@ def RunTest(params,
                         verbose=0)
     if not freeze_loaded_weights:
         set_trainable(model)
+        print('All model set trainable')
 
     use_cosine_lr = hasattr(params, 'cosine_annealing_params')
     if use_cosine_lr:
         from my_callbacks import CosineAnnealing
-        callbacks = [CosineAnnealing(len(train_gen), model_out_file, **params.cosine_annealing_params)]
+        callbacks = [CosineAnnealing(len(train_gen), model_out_file, **params.cosine_annealing_params), model_checkpoint]
 
     history = model.fit_generator(train_gen,
                         validation_data=val_gen, 
