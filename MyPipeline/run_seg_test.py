@@ -192,7 +192,7 @@ def CompileModel(model, params, use_pseudo_labeling):
             if hasattr(l, 'kernel_constraint'):
                 print('kernel_constraint for ', l, ' is set to ',  params.kernel_constraint_norm)
                 l.kernel_constraint = keras.constraints.get(keras.constraints.max_norm(params.kernel_constraint_norm))
-    else
+    else:
         for l in model.layers:
             if hasattr(l, 'kernel_constraint'):
                 l.kernel_constraint = None
