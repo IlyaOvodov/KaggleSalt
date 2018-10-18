@@ -4,9 +4,6 @@ import sys
 from imp import reload
 import numpy as np
 import matplotlib.pyplot as plt
-plt.style.use('seaborn-white')
-import seaborn as sns
-sns.set_style("white")
 import pandas as pd
 
 import keras
@@ -39,7 +36,10 @@ mean_val = 0.481577
 mean_std = 0.11108
 
 def ResultsFileName(save_results_dir, params_file, model_no, flip, is_test_run):
-    fn = save_results_dir + params_file + '.' + str(model_no) + '.results'
+    fn = save_results_dir + params_file
+    if model_no is not None:
+        fn += '.' + str(model_no)
+    fn += '.results'
     if not is_test_run:
         fn += '.val'
     if flip:
@@ -47,9 +47,9 @@ def ResultsFileName(save_results_dir, params_file, model_no, flip, is_test_run):
     return  fn
 
 def PredictResults(model, test_images, data_dir, params_file, model_no, flip, is_test_run, save_results_dir = None, eval_crop_size = 224):
-    assert isinstance(model_no, int)
+    assert (model_no is None) or isinstance(model_no, int)
     params = LoadModelParams(data_dir+params_file)
-    params.load_model_from = data_dir+params_file + '.' + str(model_no) + '.model'
+    params.load_model_from = data_dir+params_file + ('.' + str(model_no) if model_no is not None else '') + '.model'
 
     # # model
     if model is None:
